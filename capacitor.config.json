@@ -1,0 +1,16 @@
+{
+  "appId": "com.skinpeek.valorantmobile",
+  "appName": "SkinPeek Valorant",
+  "webDir": "src",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#FF4655",
+      "sound": "beep.wav"
+    }
+  }
+}

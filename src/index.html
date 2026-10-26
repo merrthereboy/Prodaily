@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ProDaily — Valorant Mobile & Store Tracker</title>
+  
+  <!-- Premium Vietnamese Typography: Be Vietnam Pro & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            valRed: '#ff4655',
+            valDark: '#070b11',
+            valCard: 'rgba(16, 23, 34, 0.75)',
+            valBorder: 'rgba(255, 255, 255, 0.08)'
+          },
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 70, 85, 0.35); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ff4655; }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Frosted Glassmorphism Styles (TPBank luxury digital banking aesthetic) */
+    .glass-header {
+      background: linear-gradient(180deg, rgba(34, 10, 16, 0.96) 0%, rgba(14, 20, 30, 0.94) 75%, rgba(9, 13, 20, 0.98) 100%);
+    }
+    
+    .glass-card {
+      background: rgba(18, 25, 38, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-card-accent {
+      background: linear-gradient(135deg, rgba(255, 70, 85, 0.12) 0%, rgba(18, 25, 38, 0.75) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 70, 85, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(255, 70, 85, 0.2);
+    }
+    
+    .glass-sheet {
+      background: rgba(12, 17, 26, 0.94);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+
+    .floating-center-action {
+      background: linear-gradient(135deg, #ff4655 0%, #b82b37 100%);
+      box-shadow: 0 6px 20px rgba(255, 70, 85, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .agent-card-active {
+      border-color: #ff4655 !important;
+      background: rgba(255, 70, 85, 0.18) !important;
+      box-shadow: 0 0 15px rgba(255, 70, 85, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-[#070b11] text-gray-100 font-sans antialiased select-none min-h-screen flex justify-center items-center">
+
+  <!-- Mobile Container (390px - 430px iPhone / Android ratio) -->
+  <div class="w-full max-w-md h-[100dvh] bg-[#090d14] flex flex-col relative overflow-hidden shadow-2xl border-x border-white/5">
+
+    <!-- ======================================================== -->
+    <!-- SECTION A: LUXURY FROSTED GLASS USER & BALANCES HEADER -->
+    <!-- ======================================================== -->
+    <div class="glass-header px-4 pt-3 pb-3 border-b border-white/10 relative z-20 flex-shrink-0">
+      
+      <!-- Top Bar: Clock, App Brand & Header 3-Dots Button -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <!-- ProDaily Brand -->
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#ff4655] animate-pulse"></span>
+            <span class="font-mono font-black text-xs tracking-wider text-white">PRO<span class="text-[#ff4655]">DAILY</span></span>
+          </div>
+          <span class="text-[10px] text-gray-500 font-mono">v2.5</span>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono text-gray-400" id="current-clock">18:45</span>
+          <!-- Settings Trigger (3-dots) -->
+          <button onclick="switchTab('settings')" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-300 transition-colors" title="Cài Đặt">
+            <span class="text-xs font-black tracking-widest leading-none">•••</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- User Info Card -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <!-- Player Avatar (Card small art) with Online Status Dot -->
+          <div class="relative cursor-pointer" onclick="switchTab('settings')">
+            <img id="user-avatar" src="https://media.valorant-api.com/playercards/1711d20d-4b1c-c64a-14be-d4ae58a457c6/smallart.png" class="w-11 h-11 rounded-2xl object-cover border border-white/20 shadow-md bg-black/40" alt="Avatar">
+            <span id="user-status-dot" class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[#090d14]" title="Đang trực tuyến"></span>
+          </div>
+
+          <!-- Player Name, Tag & Region -->
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-extrabold text-sm text-white tracking-tight" id="user-game-name">Đang đồng bộ...</span>
+              <span class="text-xs text-gray-400 font-medium" id="user-tag-line">#--</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-white/10 text-gray-300 font-mono font-bold" id="user-region-badge">AP</span>
+            </div>
+            <div class="flex items-center gap-2 text-[10.5px] mt-0.5">
+              <span class="text-emerald-400 font-medium flex items-center gap-1" id="user-status-text">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                <span data-i18n="statusConnected">Đã kết nối Riot</span>
+              </span>
+              <span class="text-gray-500">•</span>
+              <span class="text-gray-400 font-mono">Lv. <span id="player-level" class="text-gray-200 font-bold">--</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick 1-Click Copy ID Button -->
+        <button onclick="copyRiotId()" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-gray-200 flex items-center gap-1 transition-all border border-white/10">
+          <span class="text-xs">📋</span>
+          <span class="text-[11px] font-bold" data-i18n="copyIdBtn">Copy ID</span>
+        </button>
+      </div>
+
+      <!-- Currency Balances Bar (VP, RP, KC) -->
+      <div class="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-white/10 text-center">
+        <!-- Valorant Points -->
+        <div class="p-2 rounded-xl bg-white/5 border border-white/10 relative overflow-hidden">
+          <div class="text-[10px] text-gray-400 flex items-center justify-center gap-1 mb-0.5">
+            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3.5 h-3.5 object-contain" alt="VP">
+            <span class="font-bold">VP</span>
+          </div>
+          <span class="font-mono font-black text-xs text-white" id="display-vp">--</span>
+        </div>
+
+        <!-- Radianite Points -->
+        <div class="p-2 rounded-xl bg-white/5 border border-white/10 relative overflow-hidden">
+          <div class="text-[10px] text-gray-400 flex items-center justify-center gap-1 mb-0.5">
+            <img src="https://media.valorant-api.com/currencies/e59aa87c-4cbf-517a-5983-6e81511be9b7/displayicon.png" class="w-3.5 h-3.5 object-contain" alt="RP">
+            <span class="font-bold">RP</span>
+          </div>
+          <span class="font-mono font-black text-xs text-amber-400" id="display-rp">--</span>
+        </div>
+
+        <!-- Kingdom Credits (FIXED OFFICIAL ICON: 85ca954a-41f2-ce94-9b45-8ca3dd39a00d) -->
+        <div class="p-2 rounded-xl bg-white/5 border border-white/10 relative overflow-hidden">
+          <div class="text-[10px] text-gray-400 flex items-center justify-center gap-1 mb-0.5">
+            <img src="https://media.valorant-api.com/currencies/85ca954a-41f2-ce94-9b45-8ca3dd39a00d/displayicon.png" class="w-3.5 h-3.5 object-contain" alt="KC">
+            <span class="font-bold">KC</span>
+          </div>
+          <span class="font-mono font-black text-xs text-gray-200" id="display-kc">--</span>
+        </div>
+      </div>
+
+      <!-- Balance visibility toggle button -->
+      <div class="flex items-center justify-end mt-1.5">
+        <button onclick="toggleBalances()" class="text-[10px] text-gray-400 hover:text-gray-200 flex items-center gap-1 transition-colors">
+          <span id="eye-icon">👁️</span>
+          <span id="eye-text" data-i18n="hideBalances">Ẩn số dư</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SECTION B: MAIN SCROLLABLE CONTENT BODY -->
+    <!-- ======================================================== -->
+    <div id="main-content-scroll" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-3.5 no-scrollbar relative z-10 pb-20">
+
+      <!-- ========================================== -->
+      <!-- TAB 1: CỬA HÀNG (SHOP, BUNDLE & ACCESSORIES) -->
+      <!-- ========================================== -->
+      <div id="tab-shop" class="space-y-3.5">
+
+        <!-- 1. LUXURY TOTAL SPENT VALUATION CARD -->
+        <div class="glass-card-accent p-3.5 rounded-2xl relative overflow-hidden">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#ff4655]"></span>
+              <span class="text-[11px] font-black uppercase tracking-wider text-white" data-i18n="mezuValuationTitle">ƯỚC TÍNH SỐ TIỀN ĐÃ NẠP</span>
+            </div>
+          </div>
+
+          <div class="flex items-baseline justify-between pt-1">
+            <div>
+              <div class="text-2xl font-black font-mono text-white tracking-tight flex items-baseline gap-1.5">
+                <span id="mezu-vp">--</span>
+                <span class="text-xs font-bold text-[#ff4655] flex items-center gap-0.5">
+                  <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3.5 h-3.5 object-contain inline-block">
+                  VP
+                </span>
+              </div>
+              <div class="text-xs font-mono font-bold text-emerald-400 mt-0.5" id="mezu-vnd">-- VNĐ</div>
+              <!-- Dynamic Breakdown Pill -->
+              <div class="text-[9.5px] text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap" id="mezu-breakdown">
+                <span class="text-gray-500">Đang đồng bộ...</span>
+              </div>
+            </div>
+
+            <!-- Stats Mini Badges: DYNAMICALLY RENDERED FROM RIOT ENTITLEMENTS -->
+            <div class="text-right space-y-1">
+              <div class="text-[10px] text-gray-400">
+                <span data-i18n="ownedSkins">Skin sở hữu:</span> <span class="font-bold text-white font-mono" id="skins-count">--</span>
+              </div>
+              <div class="flex items-center justify-end gap-1 text-[9px] font-bold flex-wrap" id="skin-tiers-container">
+                <span class="text-[10px] text-gray-500 font-normal">Đang đồng bộ...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Meta Stats: Ngày tạo, Rank, Rank Peak (100% Dynamic) -->
+          <div class="mt-3 pt-2.5 border-t border-white/10 grid grid-cols-3 gap-1.5 text-center text-[10px]">
+            <div class="p-1.5 rounded-xl bg-black/30">
+              <span class="text-gray-400 block" data-i18n="createdAtLabel">Ngày tạo acc</span>
+              <span class="font-mono font-bold text-gray-200 mt-0.5 block" id="player-created-at">--</span>
+            </div>
+            <div class="p-1.5 rounded-xl bg-black/30">
+              <span class="text-gray-400 block" data-i18n="currentRankLabel">Rank hiện tại</span>
+              <span class="font-bold text-cyan-400 mt-0.5 block truncate" id="player-rank">--</span>
+            </div>
+            <div class="p-1.5 rounded-xl bg-black/30">
+              <span class="text-gray-400 block" data-i18n="peakRankLabel">Rank Peak</span>
+              <span class="font-bold text-purple-300 mt-0.5 block" id="player-peak-rank">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. CLICKABLE FEATURED BUNDLE BANNER (POPMONZ) -->
+        <div onclick="openFeaturedBundleModal()" class="glass-card p-3 rounded-2xl overflow-hidden relative group cursor-pointer hover:border-[#ff4655]/60 transition-all shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] px-2 py-0.5 rounded-md bg-[#ff4655] text-white font-black uppercase tracking-wider" data-i18n="featuredBundle">Bộ Sưu Tập Nổi Bật</span>
+              <span class="text-xs font-black text-white" id="bundle-banner-name">Popmonz</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono font-black text-xs text-amber-400 flex items-center gap-1">
+                <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3.5 h-3.5 object-contain">
+                <span id="bundle-banner-price">8,700 VP</span>
+              </span>
+              <span class="text-[10px] text-gray-300 bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 font-bold">8 món ↗</span>
+            </div>
+          </div>
+
+          <!-- Bundle Image (Official Cloudflare CDN Asset) -->
+          <div class="w-full h-32 rounded-xl overflow-hidden bg-black/40 border border-white/10 relative">
+            <img id="bundle-banner-img" src="https://media.valorant-api.com/bundles/f67ab55a-4480-f305-9891-9bac1b17459f/displayicon.png" onerror="this.src='https://media.valorant-api.com/bundles/f67ab55a-4480-f305-9891-9bac1b17459f/displayicon2.png'" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" alt="Bundle Popmonz">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex items-end p-2.5 justify-between">
+              <span class="text-[10.5px] text-gray-300 font-medium flex items-center gap-1">
+                <span class="text-amber-400">⚡</span> Nhấn để xem chi tiết 8 món & video
+              </span>
+              <span class="text-[10px] font-bold text-amber-300 px-2 py-0.5 rounded-lg bg-black/70 border border-amber-400/50">Xem trọn bộ ▶</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. DAILY STORE TITLE & COUNTDOWN -->
+        <div class="flex items-center justify-between pt-1">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-black text-white uppercase tracking-wider" data-i18n="dailyStoreTitle">Cửa Hàng Hàng Ngày</span>
+            <span class="text-[10px] text-gray-400" data-i18n="dailyReset">Làm mới sau:</span>
+          </div>
+          <span class="font-mono text-xs font-bold text-[#ff4655] px-2 py-0.5 rounded-lg bg-[#ff4655]/10 border border-[#ff4655]/30" id="store-countdown">--:--:--</span>
+        </div>
+
+        <!-- 4. DAILY STORE 4 SKINS GRID (WITH LIVE VP LOGO AND VIDEO PREVIEW) -->
+        <div class="grid grid-cols-2 gap-2.5" id="daily-skins-grid">
+          <!-- Rendered dynamically via JavaScript from Riot Store API -->
+        </div>
+
+        <!-- 5. ACCESSORY STORE (CỬA HÀNG PHỤ KIỆN VỚI KINGDOM CREDITS - FIXED IMAGES) -->
+        <div class="mt-4 pt-2 border-t border-white/10 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-black text-white uppercase tracking-wider" data-i18n="accessoryStoreTitle">Cửa Hàng Phụ Kiện</span>
+              <span class="text-[10px] text-gray-400" data-i18n="accessoryReset">Làm mới sau:</span>
+            </div>
+            <span class="font-mono text-xs font-bold text-cyan-400 px-2 py-0.5 rounded-lg bg-cyan-950/40 border border-cyan-800/40" id="accessory-countdown">--:--:--</span>
+          </div>
+
+          <!-- 4 Accessories Grid (100% Real Sprays, Buddies, Cards) -->
+          <div class="grid grid-cols-2 gap-2.5" id="accessory-store-grid">
+            <!-- Rendered dynamically via JavaScript -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- TAB 2: KHO ĐỒ (LOADOUT & SKIN LIBRARY) -->
+      <!-- ========================================== -->
+      <div id="tab-inventory" class="hidden space-y-3.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-black text-white uppercase tracking-wider" data-i18n="inventoryTitle">Kho Đồ & Trang Bị</h3>
+          <span class="text-[10px] text-gray-400" data-i18n="equippedSkins">Tất cả vật phẩm</span>
+        </div>
+
+        <!-- Sub Tabs: Vũ Khí / Phụ Kiện / Thư Viện Skin -->
+        <div class="flex gap-1.5 p-1 bg-black/40 rounded-2xl border border-white/10">
+          <button onclick="switchInventorySub('weapons')" id="sub-weapons-btn" class="flex-1 py-1.5 text-xs font-bold rounded-xl bg-[#ff4655] text-white transition-all" data-i18n="subWeapons">Vũ Khí</button>
+          <button onclick="switchInventorySub('accessories')" id="sub-accessories-btn" class="flex-1 py-1.5 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all" data-i18n="subAccessories">Phụ Kiện</button>
+          <button onclick="switchInventorySub('catalog')" id="sub-catalog-btn" class="flex-1 py-1.5 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all" data-i18n="subCatalog">Thư Viện Skin</button>
+        </div>
+
+        <!-- Sub View 1: Weapons Loadout -->
+        <div id="inv-weapons-view" class="space-y-2">
+          <div id="weapons-list" class="space-y-2">
+            <!-- Dynamically injected -->
+          </div>
+        </div>
+
+        <!-- Sub View 2: Accessories Loadout -->
+        <div id="inv-accessories-view" class="hidden space-y-3">
+          <div class="glass-card p-3 rounded-2xl">
+            <span class="text-[11px] font-bold text-gray-300 block mb-2" data-i18n="playerCardEquipped">Thẻ Người Chơi Đang Trang Bị:</span>
+            <div class="h-28 rounded-xl overflow-hidden bg-black/50 border border-white/10 relative">
+              <img id="inv-card-img" src="https://media.valorant-api.com/playercards/1711d20d-4b1c-c64a-14be-d4ae58a457c6/wideart.png" class="w-full h-full object-cover" alt="Player Card">
+              <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 text-xs font-bold text-white" id="inv-card-name">--</div>
+            </div>
+          </div>
+
+          <div class="glass-card p-3 rounded-2xl">
+            <span class="text-[11px] font-bold text-gray-300 block mb-2" data-i18n="gunBuddiesEquipped">Phụ Kiện Súng (Buddies):</span>
+            <div class="grid grid-cols-4 gap-2" id="buddies-grid"></div>
+          </div>
+        </div>
+
+        <!-- Sub View 3: SKIN LIBRARY CATALOG (TRA CỨU TOÀN BỘ SKIN VALORANT) -->
+        <div id="inv-catalog-view" class="hidden space-y-3">
+          <!-- Catalog Header & Search -->
+          <div class="glass-card p-3 rounded-2xl space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <span>📚</span> <span>Thư Viện Skin Valorant</span>
+              </span>
+              <span class="text-[10px] font-mono text-gray-400" id="catalog-count-badge">Đang tải...</span>
+            </div>
+            
+            <!-- Live Search Bar -->
+            <div class="relative">
+              <input type="text" id="catalog-search-input" oninput="onCatalogSearchInput(this.value)" placeholder="Tìm skin (Vandal, Phantom, Kuronami, Reaver...)" class="w-full py-2 pl-8 pr-8 bg-black/40 border border-white/10 focus:border-[#ff4655] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none">
+              <span class="absolute left-2.5 top-2.5 text-xs text-gray-400">🔍</span>
+              <button onclick="clearCatalogSearch()" id="catalog-search-clear" class="hidden absolute right-2.5 top-2 text-xs text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <!-- Quick Weapon Filter Chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 text-[10.5px]">
+              <button onclick="filterCatalogWeapon('')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-[#ff4655] text-white font-bold whitespace-nowrap" data-weapon="">Tất Cả</button>
+              <button onclick="filterCatalogWeapon('vandal')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="vandal">Vandal</button>
+              <button onclick="filterCatalogWeapon('phantom')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="phantom">Phantom</button>
+              <button onclick="filterCatalogWeapon('dao')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="dao">Dao / Melee</button>
+              <button onclick="filterCatalogWeapon('operator')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="operator">Operator</button>
+              <button onclick="filterCatalogWeapon('sheriff')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="sheriff">Sheriff</button>
+              <button onclick="filterCatalogWeapon('ghost')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="ghost">Ghost</button>
+              <button onclick="filterCatalogWeapon('spectre')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="spectre">Spectre</button>
+              <button onclick="filterCatalogWeapon('odin')" class="cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-weapon="odin">Odin</button>
+            </div>
+
+            <!-- Quick Tier Filter Chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[10px]">
+              <button onclick="filterCatalogTier('')" class="cat-t-chip px-2 py-0.5 rounded-md bg-white/10 text-white font-semibold whitespace-nowrap" data-tier="">Mọi Tier</button>
+              <button onclick="filterCatalogTier('exclusive')" class="cat-t-chip px-2 py-0.5 rounded-md bg-white/5 text-amber-400 hover:text-amber-300 font-semibold whitespace-nowrap" data-tier="exclusive">Exclusive</button>
+              <button onclick="filterCatalogTier('ultra')" class="cat-t-chip px-2 py-0.5 rounded-md bg-white/5 text-yellow-400 hover:text-yellow-300 font-semibold whitespace-nowrap" data-tier="ultra">Ultra</button>
+              <button onclick="filterCatalogTier('premium')" class="cat-t-chip px-2 py-0.5 rounded-md bg-white/5 text-purple-400 hover:text-purple-300 font-semibold whitespace-nowrap" data-tier="premium">Premium</button>
+              <button onclick="filterCatalogTier('deluxe')" class="cat-t-chip px-2 py-0.5 rounded-md bg-white/5 text-cyan-400 hover:text-cyan-300 font-semibold whitespace-nowrap" data-tier="deluxe">Deluxe</button>
+              <button onclick="filterCatalogTier('select')" class="cat-t-chip px-2 py-0.5 rounded-md bg-white/5 text-blue-400 hover:text-blue-300 font-semibold whitespace-nowrap" data-tier="select">Select</button>
+            </div>
+          </div>
+
+          <!-- Catalog Skins Grid (Dynamic) -->
+          <div class="grid grid-cols-2 gap-2.5" id="catalog-skins-grid">
+            <!-- Dynamically injected -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- TAB 3: LIVE PREGAME LOBBY & AGENT SELECT -->
+      <!-- ========================================== -->
+      <div id="tab-agent" class="hidden space-y-3.5">
+        
+        <!-- 1. LIVE LOBBY & MAP BANNER -->
+        <div id="lobby-banner-card" class="glass-card-accent p-3.5 rounded-2xl overflow-hidden relative border border-[#ff4655]/40 shadow-xl">
+          <!-- Background Map Splash Art (100% Real Map) -->
+          <div id="lobby-map-bg" class="absolute inset-0 bg-cover bg-center opacity-30 transition-all duration-700" style="background-image: url('https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/splash.png');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#090d14] via-[#090d14]/70 to-transparent"></div>
+
+          <!-- Card Content -->
+          <div class="relative z-10 space-y-2.5">
+            <!-- Top Status Row -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-white" id="lobby-status-title">PHÒNG CHỜ CHỌN TƯỚNG LIVE</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span id="lobby-queue-badge" class="px-2 py-0.5 rounded-lg bg-[#ff4655] text-white font-black text-[10px] uppercase shadow">XẾP HẠNG (COMPE)</span>
+                <span id="lobby-timer-badge" class="px-2 py-0.5 rounded-lg bg-black/60 border border-white/20 font-mono font-bold text-amber-300 text-[10px]">⏱️ 28s</span>
+              </div>
+            </div>
+
+            <!-- Map Name & Queue Details -->
+            <div class="flex items-end justify-between pt-1">
+              <div>
+                <span class="text-[10px] text-gray-400 block uppercase tracking-wider">BẢN ĐỒ THI ĐẤU</span>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-xl font-black text-white tracking-tight flex items-center gap-2" id="lobby-map-name">
+                    ASCENT
+                  </h2>
+                  <button id="btn-cycle-map" onclick="cycleDemoMap()" class="hidden text-[9.5px] px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-gray-200 border border-white/15 font-bold transition-all">
+                    🔄 Đổi Map
+                  </button>
+                </div>
+              </div>
+              <button onclick="togglePregameDemo()" class="text-[10px] px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 border border-white/15 font-bold flex items-center gap-1 transition-colors">
+                <span>🧪</span> <span id="btn-demo-text">Bật Mô Phỏng Live</span>
+              </button>
+            </div>
+
+            <!-- Auto-Lock Modes Supported Checkboxes -->
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+              <span class="text-gray-300 font-bold flex items-center gap-1">
+                <span>⚡</span> Tự động khóa:
+              </span>
+              <div class="flex items-center gap-2">
+                <label class="flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" id="cfg-unrated" onchange="updateInstalockConfig()" checked class="accent-[#ff4655] rounded">
+                  <span class="text-[10.5px] font-medium text-gray-200">Đấu thường (Unrated)</span>
+                </label>
+                <label class="flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" id="cfg-competitive" onchange="updateInstalockConfig()" checked class="accent-[#ff4655] rounded">
+                  <span class="text-[10.5px] font-medium text-gray-200">Xếp hạng (Compe)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. TEAM PICKS VIEW (HIỆN TƯỚNG CẢ TEAM ĐÃ PICK - 5 SLOTS) -->
+        <div class="glass-card p-3 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <span>👥</span> <span>Đội Hình Team Của Bạn (5 Vị Trí)</span>
+            </span>
+            <span class="text-[10px] text-gray-400" id="team-lock-count">2/5 Đã Khóa</span>
+          </div>
+
+          <!-- 5 Teammate Pick Slots -->
+          <div class="grid grid-cols-5 gap-1.5" id="lobby-team-slots">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <!-- 3. SELECTED AGENT ACTION & INSTALOCK CONTROLS -->
+        <div class="glass-card p-3 rounded-2xl space-y-3 border border-white/10">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img id="active-agent-avatar" src="https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png" class="w-12 h-12 rounded-2xl object-cover bg-black/50 border border-white/15 p-1">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-black text-white" id="active-agent-name">Jett</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold" id="active-agent-role">Đối Đầu (Duelist)</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-0.5">Bấm để chọn hoặc khóa ngay cho phòng chờ này</p>
+              </div>
+            </div>
+            
+            <div class="text-right">
+              <span class="text-[9.5px] text-gray-400 block">Trạng thái:</span>
+              <span class="text-xs font-black text-amber-400" id="active-agent-state">ĐANG CHỌN</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons: Select / Hard Lock -->
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="sendPickAction('select')" class="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/15 transition-all flex items-center justify-center gap-1.5">
+              <span>👆</span> <span>Chọn Tướng (Hover)</span>
+            </button>
+            <button onclick="sendPickAction('lock')" class="py-2.5 px-3 rounded-xl bg-[#ff4655] hover:bg-red-600 text-white text-xs font-black transition-all shadow-lg shadow-[#ff4655]/30 flex items-center justify-center gap-1.5">
+              <span>⚡</span> <span>KHÓA NGAY (LOCK IN)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. FULL VALORANT AGENTS ROSTER (TỰ DO CHỌN BẤT KỲ AGENT NÀO) -->
+        <div class="glass-card p-3 rounded-2xl space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <span>🎮</span> <span>Tất Cả Đặc Vụ Valorant (Tự Chọn)</span>
+            </span>
+            <span class="text-[10px] font-mono text-gray-400" id="roster-count">29 đặc vụ</span>
+          </div>
+
+          <!-- Role Filter Chips -->
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[10.5px]">
+            <button onclick="filterRosterRole('')" class="roster-role-chip px-2.5 py-1 rounded-lg bg-[#ff4655] text-white font-bold whitespace-nowrap" data-role="">Tất Cả</button>
+            <button onclick="filterRosterRole('Duelist')" class="roster-role-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-role="Duelist">Đối Đầu (Duelist)</button>
+            <button onclick="filterRosterRole('Initiator')" class="roster-role-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-role="Initiator">Khởi Tranh (Initiator)</button>
+            <button onclick="filterRosterRole('Controller')" class="roster-role-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-role="Controller">Kiểm Soát (Controller)</button>
+            <button onclick="filterRosterRole('Sentinel')" class="roster-role-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap" data-role="Sentinel">Hộ Vệ (Sentinel)</button>
+          </div>
+
+          <!-- Agent Grid -->
+          <div class="grid grid-cols-4 gap-2" id="roster-agents-grid">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- TAB 4: CHỢ ĐÊM (NIGHT MARKET) -->
+      <!-- ========================================== -->
+      <div id="tab-nightmarket" class="hidden space-y-3">
+        <div class="glass-card p-4 rounded-2xl text-center">
+          <span class="text-3xl mb-2 block">🌙</span>
+          <h3 class="text-sm font-black text-white" data-i18n="nightMarketTitle">Chợ Đêm Valorant</h3>
+          <p class="text-xs text-gray-400 mt-1" data-i18n="nightMarketClosedDesc">Chợ đêm hiện đang đóng cửa theo lịch chính thức của Riot Games. Khi đợt Chợ Đêm mới mở, thẻ giảm giá cá nhân sẽ tự động hiển thị tại đây.</p>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- TAB 5: CÀI ĐẶT & TÁC GIẢ (SETTINGS TAB) -->
+      <!-- ========================================== -->
+      <div id="tab-settings" class="hidden space-y-3.5">
+
+        <!-- 1. CREATOR & DISCORD COMMUNITY CARD -->
+        <div class="glass-card-accent p-3.5 rounded-2xl space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-2xl bg-[#ff4655]/20 border border-[#ff4655]/40 flex items-center justify-center font-black text-[#ff4655] text-base">
+                M
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-extrabold text-white">Tác giả:</span>
+                  <span class="text-xs font-black text-[#ff4655]">merrthereboy</span>
+                  <span class="px-1.5 py-0.2 rounded bg-[#ff4655]/20 text-[#ff4655] text-[9px] font-bold">Creator</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-0.5">Phát triển & Tối ưu hóa hệ thống ProDaily Valorant</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Official Discord Community Button -->
+          <a href="https://discord.com/invite/z4jUC4v8W2" target="_blank" class="w-full py-2.5 px-3.5 rounded-xl bg-[#5865F2] hover:bg-[#4752c4] text-white flex items-center justify-between shadow-lg shadow-[#5865F2]/25 transition-all">
+            <div class="flex items-center gap-2.5">
+              <!-- Official Discord SVG Logo -->
+              <svg class="w-5 h-5 fill-white" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,45.91,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,45.91,96.12,53,91.08,65.69,84.69,65.69Z"/>
+              </svg>
+              <div class="text-left">
+                <div class="text-xs font-bold leading-tight">Tham gia Server Discord</div>
+                <div class="text-[9.5px] text-white/80 leading-tight">Giao lưu & Báo lỗi cùng merrthereboy</div>
+              </div>
+            </div>
+            <span class="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-lg">Tham gia ↗</span>
+          </a>
+        </div>
+
+        <!-- 2. HẸN SKIN & THÔNG BÁO (SKIN WATCHLIST & ALERTS) -->
+        <div class="glass-card p-3.5 rounded-2xl" id="alert-section">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[#ff4655] text-sm">🔔</span>
+              <h3 class="text-xs font-black text-white uppercase tracking-wider" data-i18n="alertSkinTitle">Hẹn Skin & Thông Báo</h3>
+            </div>
+            <span class="text-[10px] text-gray-400" data-i18n="alertAutoNotify">Báo ngay khi xuất hiện</span>
+          </div>
+
+          <p class="text-xs text-gray-400 mb-3" data-i18n="alertDesc">Nhập tên skin bạn muốn hẹn, xem video hoạt ảnh từng cấp và thêm vào danh sách theo dõi:</p>
+
+          <!-- Search Input with Live Autocomplete -->
+          <div class="relative">
+            <input type="text" id="alert-skin-input" oninput="handleSkinSearchInput(this.value)" placeholder="Ví dụ: Kuronami, Prime, Reaver, RGX..." class="w-full py-2.5 pl-3 pr-20 bg-black/40 border border-white/10 focus:border-[#ff4655] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none transition-colors">
+            
+            <div class="absolute right-1.5 top-1.5 flex items-center gap-1">
+              <span id="search-spinner" class="hidden w-4 h-4 border-2 border-[#ff4655] border-t-transparent rounded-full animate-spin"></span>
+              <button onclick="addCustomAlertSkin()" class="px-2.5 py-1 bg-[#ff4655] hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-all shadow" data-i18n="addBtn">Thêm</button>
+            </div>
+
+            <!-- Dynamic Autocomplete Suggestions Dropdown -->
+            <div id="skin-search-suggestions" class="hidden absolute left-0 right-0 top-11 bg-[#0b1018] border border-white/15 rounded-xl shadow-2xl p-1.5 z-40 max-h-60 overflow-y-auto space-y-1"></div>
+          </div>
+
+          <!-- Alert Skins List -->
+          <div class="mt-3.5 space-y-1.5" id="alert-skins-list"></div>
+        </div>
+
+        <!-- 3. TÀI KHOẢN & TIỆN ÍCH HỆ THỐNG -->
+        <div class="glass-card p-3.5 rounded-2xl space-y-2.5">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1" data-i18n="accountSettingsTitle">Quản Lý Tài Khoản</h4>
+
+          <!-- Account Info & Copy Riot ID -->
+          <div class="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-extrabold text-white" id="settings-riot-id">--</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Khu vực: <span class="text-gray-200 font-mono font-bold" id="settings-region">AP</span> • Level: <span class="text-gray-200 font-mono font-bold" id="settings-level">--</span></div>
+            </div>
+            <button onclick="copyRiotId()" class="px-3 py-1.5 bg-[#ff4655]/20 hover:bg-[#ff4655]/30 text-[#ff4655] rounded-xl border border-[#ff4655]/40 text-xs font-bold flex items-center gap-1" data-i18n="copyBtn">
+              <span>📋</span> <span>Sao chép ID</span>
+            </button>
+          </div>
+
+          <!-- Switch Language -->
+          <button onclick="toggleLanguage()" class="w-full py-2.5 px-3 bg-white/5 hover:bg-white/10 text-gray-200 rounded-xl text-xs font-semibold flex items-center justify-between border border-white/10 transition-colors">
+            <span class="flex items-center gap-2">
+              <span>🌐</span> <span data-i18n="switchLangLabel">Ngôn ngữ hiển thị (Language)</span>
+            </span>
+            <span class="text-xs font-bold text-[#ff4655]" id="settings-lang-badge">🇻🇳 Tiếng Việt</span>
+          </button>
+
+          <!-- Official Riot Purchase History Link -->
+          <a href="https://support-valorant.riotgames.com/hc/vi/articles/360045487533-Checking-Your-Purchase-History" target="_blank" class="w-full py-2.5 px-3 bg-white/5 hover:bg-white/10 text-gray-200 rounded-xl text-xs font-semibold flex items-center justify-between border border-white/10 transition-colors">
+            <span class="flex items-center gap-2">
+              <span>🧾</span> <span data-i18n="officialHistoryTitle">Lịch Sử Nạp Riot Games Gốc</span>
+            </span>
+            <span class="text-xs text-emerald-400">Mở ↗</span>
+          </a>
+
+          <!-- Reconnect / Change Account -->
+          <button onclick="openLoginModal()" id="btn-open-login" class="w-full py-2.5 px-3 bg-white/5 hover:bg-white/10 text-gray-200 rounded-xl text-xs font-semibold flex items-center justify-between border border-white/10 transition-colors">
+            <span class="flex items-center gap-2">
+              <span>🔄</span> <span data-i18n="reconnectAccount">Đổi / Kết nối lại tài khoản Riot</span>
+            </span>
+            <span class="text-xs text-gray-400">→</span>
+          </button>
+
+          <!-- Server Connection URL (For APK & Remote Access) -->
+          <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px] font-bold text-gray-300">
+              <span class="flex items-center gap-1.5"><span>📡</span> <span>Địa Chỉ Máy Chủ (Server URL)</span></span>
+              <button onclick="saveServerHost()" class="text-[9.5px] px-2 py-0.5 rounded-lg bg-[#ff4655] hover:bg-red-600 text-white font-bold transition-all shadow">Lưu</button>
+            </div>
+            <input type="text" id="settings-server-host" placeholder="http://192.168.1.205:3000" class="w-full py-1.5 px-2.5 bg-black/50 border border-white/15 focus:border-[#ff4655] rounded-lg text-xs text-white font-mono focus:outline-none">
+            <span class="text-[9.5px] text-gray-400 block leading-tight">Dùng IP máy tính hoặc domain cloud khi cài file APK trên điện thoại.</span>
+          </div>
+
+          <!-- Logout Button (Clean Wipe) -->
+          <button onclick="logoutRiot()" id="btn-logout" class="w-full py-2.5 px-3 bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-red-900/60 transition-colors mt-2">
+            <span>🚪</span> <span data-i18n="logoutBtn">Đăng Xuất Hoàn Toàn Khỏi Riot</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SECTION C: BOTTOM NAVIGATION BAR (FROSTED GLASS) -->
+    <!-- ======================================================== -->
+    <div class="bg-[#070b11]/95 backdrop-blur-2xl border-t border-white/10 px-3 py-2 flex items-center justify-between z-30 relative flex-shrink-0">
+      
+      <!-- Nav 1: Cửa Hàng -->
+      <button onclick="switchTab('shop')" id="nav-shop" class="flex flex-col items-center flex-1 text-[#ff4655] font-bold text-[10px] gap-0.5 transition-colors">
+        <span class="text-lg">🛒</span>
+        <span data-i18n="navShop">Cửa hàng</span>
+      </button>
+
+      <!-- Nav 2: Kho Đồ -->
+      <button onclick="switchTab('inventory')" id="nav-inventory" class="flex flex-col items-center flex-1 text-gray-400 hover:text-white text-[10px] gap-0.5 transition-colors">
+        <span class="text-lg">🎒</span>
+        <span data-i18n="navInventory">Kho đồ</span>
+      </button>
+
+      <!-- CENTER FLOATING ACTION BUTTON (PICK TƯỚNG / LOBBY) -->
+      <div class="relative -top-5 flex-1 flex justify-center">
+        <button onclick="switchTab('agent')" id="nav-agent" class="w-14 h-14 rounded-full floating-center-action flex items-center justify-center text-white shadow-2xl transition-all cursor-pointer group" title="Phòng chờ & Khóa tướng">
+          <span class="text-2xl group-hover:scale-110 transition-transform">⚡</span>
+        </button>
+      </div>
+
+      <!-- Nav 3: Chợ Đêm -->
+      <button onclick="switchTab('nightmarket')" id="nav-nightmarket" class="flex flex-col items-center flex-1 text-gray-400 hover:text-white text-[10px] gap-0.5 transition-colors">
+        <span class="text-lg">🌙</span>
+        <span data-i18n="navNightMarket">Chợ đêm</span>
+      </button>
+
+      <!-- Nav 4: Cài Đặt (3-DOTS SETTINGS BUTTON) -->
+      <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center flex-1 text-gray-400 hover:text-white text-[10px] gap-0.5 transition-colors">
+        <span class="text-lg font-black tracking-widest leading-none my-0.5">•••</span>
+        <span data-i18n="navSettings">Cài đặt</span>
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: FEATURED BUNDLE DETAIL MODAL (8 ITEMS & VIDEOS) -->
+  <!-- ======================================================== -->
+  <div id="bundle-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 animate-fade-in">
+    <div class="glass-sheet bg-[#090d14] border border-white/15 rounded-3xl w-full max-w-sm max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-3.5 bg-black/50 flex items-center justify-between border-b border-white/10 flex-shrink-0">
+        <div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#ff4655] text-white font-black uppercase tracking-wider">Trọn Bộ Sưu Tập</span>
+          <h3 class="text-sm font-black text-white mt-0.5" id="bundle-modal-title">Bộ Sưu Tập Popmonz</h3>
+        </div>
+        <button onclick="closeFeaturedBundleModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 flex items-center justify-center text-sm font-bold">✕</button>
+      </div>
+
+      <!-- Scrollable Items List -->
+      <div class="p-3 space-y-3 overflow-y-auto no-scrollbar flex-1">
+        <!-- Banner Image -->
+        <div class="w-full h-32 rounded-xl overflow-hidden bg-black/50 border border-white/10 relative">
+          <img id="bundle-modal-img" src="https://media.valorant-api.com/bundles/f67ab55a-4480-f305-9891-9bac1b17459f/displayicon.png" class="w-full h-full object-cover">
+          <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/80 font-mono font-black text-amber-300 text-xs flex items-center gap-1 border border-amber-400/40">
+            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3.5 h-3.5 object-contain">
+            <span id="bundle-modal-price">8,700 VP</span>
+          </div>
+        </div>
+
+        <!-- Savings Notice -->
+        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs">
+          <span class="text-gray-300">Tổng giá trị riêng lẻ: <s class="font-mono text-gray-500" id="bundle-modal-base-price">14,025 VP</s></span>
+          <span class="text-amber-300 font-bold" id="bundle-modal-savings">Tiết kiệm 5,325 VP</span>
+        </div>
+
+        <div class="text-[11px] font-bold text-gray-300 uppercase tracking-wider">Danh sách 8 vật phẩm trong gói:</div>
+
+        <!-- 8 Items Container -->
+        <div class="space-y-2" id="bundle-modal-items">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3 bg-black/60 border-t border-white/10 flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] text-gray-400">Ưu đãi mua trọn bộ Riot Store</span>
+        <button onclick="closeFeaturedBundleModal()" class="px-4 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: INTERACTIVE SKIN VIDEO & LEVEL PREVIEW MODAL -->
+  <!-- ======================================================== -->
+  <div id="skin-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 animate-fade-in">
+    <div class="glass-sheet bg-[#090d14] border border-white/15 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-3.5 bg-black/40 flex items-center justify-between border-b border-white/10 flex-shrink-0">
+        <div>
+          <h3 class="text-xs font-black text-white" id="modal-title">--</h3>
+          <div class="flex items-center gap-1.5 text-[10px] text-gray-400 mt-0.5">
+            <span class="text-amber-400 font-bold" id="modal-tier">PREMIUM</span>
+            <span>•</span>
+            <div class="flex items-center gap-1 font-mono text-gray-200 font-bold">
+              <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3.5 h-3.5 object-contain inline-block">
+              <span id="modal-price">-- VP</span>
+            </div>
+          </div>
+        </div>
+        <button onclick="closeSkinModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 flex items-center justify-center text-sm font-bold">✕</button>
+      </div>
+
+      <!-- Video / Image Container -->
+      <div id="modal-media-container" class="w-full h-52 bg-black flex items-center justify-center relative overflow-hidden flex-shrink-0">
+        <!-- Injected video or image -->
+      </div>
+
+      <!-- Levels & Chromas Selector -->
+      <div class="p-3.5 space-y-3 bg-[#070b11] border-t border-white/10 max-h-56 overflow-y-auto">
+        <!-- Upgrade Levels -->
+        <div id="modal-levels-wrapper">
+          <span class="text-[10px] font-bold text-gray-400 block mb-1.5" data-i18n="upgradeLevels">CẤP ĐỘ HOẠT ẢNH / NÂNG CẤP:</span>
+          <div class="flex flex-wrap gap-1.5" id="modal-levels-container"></div>
+        </div>
+
+        <!-- Chromas -->
+        <div id="modal-chromas-wrapper">
+          <span class="text-[10px] font-bold text-gray-400 block mb-1.5" data-i18n="chromasTitle">BIẾN THỂ MÀU SẮC (CHROMAS):</span>
+          <div class="flex flex-wrap gap-1.5" id="modal-chromas-container"></div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3 bg-black/60 border-t border-white/10 flex items-center gap-2 flex-shrink-0">
+        <button id="modal-alert-btn" onclick="toggleModalAlertSkin()" class="w-full py-2 bg-[#ff4655] hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow">
+          <span>🔔</span> <span data-i18n="addToAlert">Thêm vào Danh Sách Alert Skin</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: RIOT LOGIN & RECONNECT MODAL (CLEAN & PURE) -->
+  <!-- ======================================================== -->
+  <div id="login-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 animate-fade-in">
+    <div class="glass-sheet bg-[#090d14] border border-white/15 rounded-3xl w-full max-w-sm p-4 shadow-2xl flex flex-col space-y-3.5">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-2 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#ff4655]"></span>
+          <h3 class="text-xs font-extrabold text-white uppercase tracking-wider" data-i18n="loginModalTitle">Kết Nối Tài Khoản Riot</h3>
+        </div>
+        <button onclick="closeLoginModal()" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 flex items-center justify-center text-xs font-bold">✕</button>
+      </div>
+
+      <p class="text-xs text-gray-400 leading-relaxed" data-i18n="loginModalDesc">Để đồng bộ dữ liệu Cửa hàng, Kho đồ, Khóa tướng và Tra cứu skin chính xác 100%, vui lòng làm theo 2 bước sau:</p>
+
+      <!-- Step 1: Open Riot Official Login Page with prompt=login -->
+      <div class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+        <span class="text-[11px] font-bold text-gray-300 block" data-i18n="step1Title">Bước 1: Mở trang xác thực Riot Games</span>
+        <button onclick="openRiotAuthUrl()" class="w-full py-2.5 px-3 bg-[#ff4655] hover:bg-red-600 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg">
+          <span>🌐</span> <span data-i18n="step1Btn">Mở Trang Đăng Nhập Riot</span>
+        </button>
+        <span class="text-[10px] text-gray-400 block leading-tight" data-i18n="step1Hint">Sau khi đăng nhập, trình duyệt sẽ chuyển hướng sang trang trắng (localhost/redirect) chứa mã xác thực.</span>
+      </div>
+
+      <!-- Step 2: Paste Redirect URL -->
+      <div class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-gray-300 block" data-i18n="step2Title">Bước 2: Dán đường dẫn URL sau khi đăng nhập</span>
+          <button onclick="pasteFromClipboard()" class="text-[9.5px] px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 font-bold transition-all flex items-center gap-1">📋 Dán nhanh</button>
+        </div>
+        <input type="text" id="login-redirect-url-input" placeholder="http://localhost/redirect#access_token=..." class="w-full py-2 px-3 bg-black/50 border border-white/15 focus:border-[#ff4655] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none font-mono">
+        <button onclick="submitLoginUrl()" id="submit-login-btn" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg">
+          <span>🔑</span> <span data-i18n="step2Btn">Xác Nhận Kết Nối Tài Khoản</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-20 z-50 px-4 py-2 bg-[#ff4655] text-white text-xs font-bold rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce">
+    <span>✓</span>
+    <span id="toast-msg">Thông báo</span>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT LOGIC -->
+  <!-- ======================================================== -->
+  <script>
+  function getApiHost() {
+    const custom = localStorage.getItem('skinpeek_server_host');
+    if (custom) return custom.replace(/\/$/, '');
+    if (window.location.port === '3000') return window.location.origin;
+    if (window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
+      return window.location.origin;
+    }
+    return 'http://192.168.1.205:3000';
+  }
+
+  function saveServerHost() {
+    const input = document.getElementById('settings-server-host');
+    const val = input ? input.value.trim() : '';
+    if (val) {
+      localStorage.setItem('skinpeek_server_host', val);
+      showToast('Đã lưu máy chủ: ' + val);
+    } else {
+      localStorage.removeItem('skinpeek_server_host');
+      showToast('Đã đặt lại máy chủ mặc định');
+    }
+    loadData();
+  }
+
+  let currentLang = 'vi';
+  let isBalanceHidden = false;
+  let currentRiotId = '';
+  let realVp = 0;
+  let realRp = 0;
+  let realKc = 0;
+  let currentActiveSkin = null;
+  let currentBundleData = null;
+  let wishlistedSkins = [];
+  let searchDebounceTimer = null;
+  let catalogSearchDebounce = null;
+  let isAuthenticated = true;
+  let catalogActiveWeapon = '';
+  let catalogActiveTier = '';
+
+  // Pregame Agent Select State
+  let allAgentsList = [];
+  let currentActiveAgent = {
+    uuid: 'add6443a-41bd-e414-f6ad-e58d267f4e95',
+    displayName: 'Jett',
+    role: 'Đối Đầu (Duelist)',
+    displayIcon: 'https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png'
+  };
+  let pregameMatchId = 'simulated-match-live';
+  let pregamePollInterval = null;
+  let rosterActiveRole = '';
+
+  // I18N DICTIONARY
+  const i18n = {
+    vi: {
+      statusConnected: "Đã kết nối Riot",
+      statusDisconnected: "Chưa kết nối Riot",
+      copyIdBtn: "Sao chép ID",
+      hideBalances: "Ẩn số dư",
+      showBalances: "Hiện số dư",
+      mezuValuationTitle: "ƯỚC TÍNH SỐ TIỀN ĐÃ NẠP",
+      ownedSkins: "Skin sở hữu:",
+      createdAtLabel: "Ngày tạo acc",
+      currentRankLabel: "Rank hiện tại",
+      peakRankLabel: "Rank Peak",
+      featuredBundle: "Bộ Sưu Tập Nổi Bật",
+      dailyStoreTitle: "Cửa Hàng Hàng Ngày",
+      dailyReset: "Làm mới sau:",
+      accessoryStoreTitle: "Cửa Hàng Phụ Kiện",
+      accessoryReset: "Làm mới sau:",
+      inventoryTitle: "Kho Đồ & Trang Bị",
+      equippedSkins: "Tất cả vật phẩm",
+      subWeapons: "Vũ Khí",
+      subAccessories: "Phụ Kiện",
+      subCatalog: "Thư Viện Skin",
+      playerCardEquipped: "Thẻ Người Chơi Đang Trang Bị:",
+      gunBuddiesEquipped: "Phụ Kiện Súng (Buddies):",
+      nightMarketTitle: "Chợ Đêm Valorant",
+      nightMarketClosedDesc: "Chợ đêm hiện đang đóng cửa theo lịch chính thức của Riot Games. Khi đợt Chợ Đêm mới mở, thẻ giảm giá cá nhân sẽ tự động hiển thị tại đây.",
+      alertSkinTitle: "Hẹn Skin & Thông Báo",
+      alertAutoNotify: "Báo ngay khi xuất hiện",
+      alertDesc: "Nhập tên skin bạn muốn hẹn, xem video hoạt ảnh từng cấp và thêm vào danh sách theo dõi:",
+      addBtn: "Thêm",
+      accountSettingsTitle: "Quản Lý Tài Khoản",
+      officialHistoryTitle: "Lịch Sử Nạp Riot Games Gốc",
+      openBtn: "Mở",
+      copyBtn: "Sao chép ID",
+      switchLangLabel: "Ngôn ngữ hiển thị (Language)",
+      reconnectAccount: "Đổi / Kết nối lại tài khoản Riot",
+      logoutBtn: "Đăng Xuất Hoàn Toàn Khỏi Riot",
+      loginModalTitle: "Kết Nối Tài Khoản Riot",
+      loginModalDesc: "Để đồng bộ dữ liệu Cửa hàng, Kho đồ, Khóa tướng và Tra cứu skin chính xác 100%, vui lòng làm theo 2 bước sau:",
+      step1Title: "Bước 1: Mở trang xác thực Riot Games",
+      step1Btn: "Mở Trang Đăng Nhập Riot",
+      step1Hint: "Sau khi đăng nhập, trình duyệt sẽ chuyển hướng sang trang trắng (localhost:3000) chứa mã xác thực.",
+      step2Title: "Bước 2: Dán đường dẫn URL sau khi đăng nhập",
+      step2Btn: "Xác Nhận Kết Nối Tài Khoản",
+      navShop: "Cửa hàng",
+      navInventory: "Kho đồ",
+      navNightMarket: "Chợ đêm",
+      navSettings: "Cài đặt",
+      upgradeLevels: "CẤP ĐỘ HOẠT ẢNH / NÂNG CẤP:",
+      chromasTitle: "BIẾN THỂ MÀU SẮC (CHROMAS):",
+      addToAlert: "Thêm vào Danh Sách Alert Skin",
+      viewVideo: "Xem Video",
+      viewPhoto: "Xem Ảnh"
+    },
+    en: {
+      statusConnected: "Riot Connected",
+      statusDisconnected: "Disconnected",
+      copyIdBtn: "Copy ID",
+      hideBalances: "Hide Balances",
+      showBalances: "Show Balances",
+      mezuValuationTitle: "ESTIMATED TOTAL TOP-UP",
+      ownedSkins: "Owned Skins:",
+      createdAtLabel: "Created Date",
+      currentRankLabel: "Current Rank",
+      peakRankLabel: "Peak Rank",
+      featuredBundle: "Featured Collection",
+      dailyStoreTitle: "Daily Store Offers",
+      dailyReset: "Refreshes in:",
+      accessoryStoreTitle: "Accessory Store",
+      accessoryReset: "Refreshes in:",
+      inventoryTitle: "Inventory & Loadout",
+      equippedSkins: "All Items",
+      subWeapons: "Weapons",
+      subAccessories: "Accessories",
+      subCatalog: "Skin Library",
+      playerCardEquipped: "Equipped Player Card:",
+      gunBuddiesEquipped: "Equipped Gun Buddies:",
+      nightMarketTitle: "Valorant Night.Market",
+      nightMarketClosedDesc: "Night.Market is currently closed according to Riot Games official schedule. Personal discount cards will appear here during live periods.",
+      alertSkinTitle: "Skin Watchlist & Alerts",
+      alertAutoNotify: "Instant notifications",
+      alertDesc: "Search skins, watch level animations & videos, and add to your alert watchlist:",
+      addBtn: "Add",
+      accountSettingsTitle: "Account Management",
+      officialHistoryTitle: "Official Riot Purchase History",
+      openBtn: "Open",
+      copyBtn: "Copy ID",
+      switchLangLabel: "Display Language",
+      reconnectAccount: "Switch / Reconnect Riot Account",
+      logoutBtn: "Log Out of Riot Account",
+      loginModalTitle: "Connect Riot Account",
+      loginModalDesc: "To synchronize Store, Loadout, Instalock and Skin Library 100% accurately, please follow 2 steps:",
+      step1Title: "Step 1: Open Riot Authentication Page",
+      step1Btn: "Open Riot Login Page",
+      step1Hint: "After login, browser will redirect to a blank page (localhost:3000) containing your tokens.",
+      step2Title: "Step 2: Paste Redirect URL below",
+      step2Btn: "Confirm & Connect Account",
+      navShop: "Shop",
+      navInventory: "Inventory",
+      navNightMarket: "Night.Market",
+      navSettings: "Settings",
+      upgradeLevels: "ANIMATION LEVELS / UPGRADES:",
+      chromasTitle: "COLOR VARIANTS (CHROMAS):",
+      addToAlert: "Add to Alert Watchlist",
+      viewVideo: "Watch Video",
+      viewPhoto: "View Photo"
+    }
+  };
+
+  // Switch Tab
+  function switchTab(tabId) {
+    const tabs = ['shop', 'inventory', 'agent', 'nightmarket', 'settings'];
+    tabs.forEach(t => {
+      const el = document.getElementById('tab-' + t);
+      const nav = document.getElementById('nav-' + t);
+      if (el) el.classList.add('hidden');
+      if (nav) {
+        nav.classList.remove('text-[#ff4655]', 'active-tab');
+        nav.classList.add('text-gray-400');
+      }
+    });
+
+    const activeEl = document.getElementById('tab-' + tabId);
+    const activeNav = document.getElementById('nav-' + tabId);
+    if (activeEl) activeEl.classList.remove('hidden');
+    if (activeNav) {
+      activeNav.classList.remove('text-gray-400');
+      activeNav.classList.add('text-[#ff4655]', 'active-tab');
+    }
+
+    if (tabId === 'inventory') {
+      const catalogView = document.getElementById('inv-catalog-view');
+      if (catalogView && !catalogView.classList.contains('hidden')) {
+        loadCatalogSkins(catalogActiveWeapon, catalogActiveTier, '');
+      }
+    } else if (tabId === 'agent') {
+      fetchPregameStatus();
+    }
+  }
+
+  // Switch Inventory Sub Tabs: weapons | accessories | catalog
+  function switchInventorySub(sub) {
+    ['weapons', 'accessories', 'catalog'].forEach(s => {
+      const btn = document.getElementById('sub-' + s + '-btn');
+      const view = document.getElementById('inv-' + s + '-view');
+      if (btn && view) {
+        if (s === sub) {
+          btn.className = "flex-1 py-1.5 text-xs font-bold rounded-xl bg-[#ff4655] text-white transition-all shadow";
+          view.classList.remove('hidden');
+        } else {
+          btn.className = "flex-1 py-1.5 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all";
+          view.classList.add('hidden');
+        }
+      }
+    });
+
+    if (sub === 'catalog') {
+      loadCatalogSkins(catalogActiveWeapon, catalogActiveTier, '');
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    const m = document.getElementById('toast-msg');
+    m.textContent = msg;
+    t.classList.remove('hidden');
+    setTimeout(() => { t.classList.add('hidden'); }, 3000);
+  }
+
+  function copyRiotId() {
+    if (currentRiotId) {
+      navigator.clipboard.writeText(currentRiotId);
+      showToast(currentLang === 'vi' ? 'Đã sao chép: ' + currentRiotId : 'Copied: ' + currentRiotId);
+    }
+  }
+
+  function toggleLanguage() {
+    currentLang = currentLang === 'vi' ? 'en' : 'vi';
+    applyLanguage(currentLang);
+  }
+
+  function applyLanguage(lang) {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (i18n[lang] && i18n[lang][key]) {
+        el.textContent = i18n[lang][key];
+      }
+    });
+    const langBadge = document.getElementById('settings-lang-badge');
+    if (langBadge) {
+      langBadge.textContent = lang === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English';
+    }
+    const userStatusText = document.getElementById('user-status-text');
+    if (userStatusText) {
+      userStatusText.textContent = isAuthenticated ? i18n[lang].statusConnected : i18n[lang].statusDisconnected;
+    }
+  }
+
+  function toggleBalances() {
+    isBalanceHidden = !isBalanceHidden;
+    const vpEl = document.getElementById('display-vp');
+    const rpEl = document.getElementById('display-rp');
+    const kcEl = document.getElementById('display-kc');
+    const eyeIcon = document.getElementById('eye-icon');
+    const eyeText = document.getElementById('eye-text');
+
+    if (isBalanceHidden) {
+      vpEl.textContent = '••••';
+      rpEl.textContent = '••••';
+      kcEl.textContent = '••••';
+      eyeIcon.textContent = '🔒';
+      eyeText.textContent = currentLang === 'vi' ? 'Hiện số dư' : 'Show Balances';
+    } else {
+      vpEl.textContent = realVp.toLocaleString();
+      rpEl.textContent = realRp.toLocaleString();
+      kcEl.textContent = realKc.toLocaleString();
+      eyeIcon.textContent = '👁️';
+      eyeText.textContent = currentLang === 'vi' ? 'Ẩn số dư' : 'Hide Balances';
+    }
+  }
+
+  // ==========================================
+  // COMPLETE LOGOUT (CLEAN WIPE - ZERO LEFTOVER)
+  // ==========================================
+  async function logoutRiot() {
+    const apiHost = getApiHost();
+    try {
+      await fetch(apiHost + '/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.warn('Logout API error:', e.message);
+    }
+    
+    // Complete wipe of all client local storage and state
+    localStorage.clear();
+    sessionStorage.clear();
+    currentRiotId = '';
+    realVp = 0;
+    realRp = 0;
+    realKc = 0;
+    currentActiveSkin = null;
+    currentBundleData = null;
+    wishlistedSkins = [];
+    isAuthenticated = false;
+
+    renderLoggedOutState();
+    showToast(currentLang === 'vi' ? 'Đã đăng xuất sạch toàn bộ tài khoản!' : 'Completely logged out of Riot Account!');
+    openLoginModal();
+  }
+
+  function renderLoggedOutState() {
+    document.getElementById('user-game-name').textContent = currentLang === 'vi' ? 'Chưa đăng nhập' : 'Not Connected';
+    document.getElementById('user-tag-line').textContent = '';
+    document.getElementById('user-status-dot').className = 'absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-[#090d14]';
+    document.getElementById('user-status-text').textContent = currentLang === 'vi' ? 'Chưa kết nối' : 'Disconnected';
+    document.getElementById('user-status-text').className = 'text-red-400 font-medium';
+    document.getElementById('user-avatar').src = 'https://media.valorant-api.com/playercards/1711d20d-4b1c-c64a-14be-d4ae58a457c6/smallart.png';
+    
+    document.getElementById('display-vp').textContent = '0';
+    document.getElementById('display-rp').textContent = '0';
+    document.getElementById('display-kc').textContent = '0';
+    document.getElementById('mezu-vp').textContent = '0';
+    document.getElementById('mezu-vnd').textContent = '0 VNĐ';
+    document.getElementById('mezu-breakdown').innerHTML = '<span class="text-gray-500">Chưa kết nối tài khoản</span>';
+    document.getElementById('skins-count').textContent = '0';
+    document.getElementById('skin-tiers-container').innerHTML = '<span class="text-gray-500 font-normal">--</span>';
+    document.getElementById('player-level').textContent = '--';
+    document.getElementById('player-created-at').textContent = '--';
+    document.getElementById('player-rank').textContent = '--';
+    document.getElementById('player-peak-rank').textContent = '--';
+    document.getElementById('settings-riot-id').textContent = 'Chưa kết nối';
+    document.getElementById('settings-level').textContent = '--';
+
+    const dailyGrid = document.getElementById('daily-skins-grid');
+    if (dailyGrid) {
+      dailyGrid.innerHTML = `
+        <div class="col-span-2 glass-card p-6 rounded-2xl text-center space-y-3">
+          <span class="text-3xl block">🔑</span>
+          <div class="text-xs font-bold text-white">Vui lòng kết nối tài khoản Riot để xem Cửa hàng</div>
+          <button onclick="openLoginModal()" class="px-4 py-2 bg-[#ff4655] hover:bg-red-600 text-white rounded-xl text-xs font-bold shadow">
+            Đăng Nhập Riot Ngay
+          </button>
+        </div>
+      `;
+    }
+
+    const accGrid = document.getElementById('accessory-store-grid');
+    if (accGrid) accGrid.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-500 py-4">Chưa đăng nhập</div>';
+
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+      btnLogout.innerHTML = '<span>🔑</span> <span>' + (currentLang === 'vi' ? 'Đăng Nhập Riot Games' : 'Log In Riot Games') + '</span>';
+      btnLogout.className = "w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors mt-2";
+      btnLogout.onclick = openLoginModal;
+    }
+  }
+
+  // RIOT AUTH MODAL LOGIC
+  function openLoginModal() {
+    document.getElementById('login-modal').classList.remove('hidden');
+  }
+
+  function closeLoginModal() {
+    document.getElementById('login-modal').classList.add('hidden');
+  }
+
+  const RIOT_AUTH_URL = 'https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&client_id=riot-client&response_type=token%20id_token&scope=openid%20link%20ban%20lol_region&nonce=1';
+
+  async function openRiotAuthUrl() {
+    const apiHost = getApiHost();
+    let target = RIOT_AUTH_URL;
+    try {
+      const res = await fetch(apiHost + '/api/auth/login-url');
+      const data = await res.json();
+      if (data && (data.loginUrl || data.url)) {
+        target = data.loginUrl || data.url;
+      }
+    } catch (e) {
+      // Use fallback RIOT_AUTH_URL
+    }
+    window.open(target, '_blank');
+  }
+
+  async function pasteFromClipboard() {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text && (text.includes('access_token') || text.includes('http'))) {
+          document.getElementById('login-redirect-url-input').value = text;
+          showToast('Đã dán link từ bộ nhớ tạm!');
+          return;
+        }
+      }
+    } catch (e) {}
+    showToast('Hãy nhấn giữ vào ô rồi chọn Dán (Paste)!');
+  }
+
+  async function submitLoginUrl() {
+    const input = document.getElementById('login-redirect-url-input');
+    const url = input.value.trim();
+    if (!url) {
+      showToast('Vui lòng dán link URL sau khi đăng nhập!');
+      return;
+    }
+
+    const btn = document.getElementById('submit-login-btn');
+    btn.textContent = 'Đang xử lý kết nối...';
+    btn.disabled = true;
+
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url, redirectUrl: url })
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast('Đã kết nối thành công: ' + (json.riotId || (json.user ? `${json.user.gameName}#${json.user.tagLine}` : 'Riot Account')));
+        closeLoginModal();
+        input.value = '';
+        await loadData();
+      } else {
+        showToast('Lỗi: ' + (json.message || 'Không thể đăng nhập!'));
+      }
+    } catch (e) {
+      showToast('Lỗi kết nối máy chủ: ' + e.message);
+    } finally {
+      btn.textContent = 'Xác Nhận Kết Nối Tài Khoản';
+      btn.disabled = false;
+    }
+  }
+
+  // ==========================================
+  // FEATURED BUNDLE MODAL (8 ITEMS & VIDEOS)
+  // ==========================================
+  function openFeaturedBundleModal() {
+    if (!currentBundleData) {
+      showToast('Đang tải dữ liệu bundle...');
+      return;
+    }
+
+    const b = currentBundleData;
+    document.getElementById('bundle-modal-title').textContent = b.name || 'Bộ Sưu Tập Nổi Bật';
+    if (b.displayIcon) {
+      document.getElementById('bundle-modal-img').src = b.displayIcon;
+    }
+    document.getElementById('bundle-modal-price').textContent = (b.price || 8700).toLocaleString() + ' VP';
+
+    // Calculate total base price and savings
+    let totalBase = 0;
+    const items = b.items || [];
+    items.forEach(it => { totalBase += (it.basePrice || 0); });
+    if (totalBase === 0) totalBase = 14025;
+    const savings = Math.max(0, totalBase - (b.price || 8700));
+
+    document.getElementById('bundle-modal-base-price').textContent = totalBase.toLocaleString() + ' VP';
+    document.getElementById('bundle-modal-savings').textContent = 'Tiết kiệm ' + savings.toLocaleString() + ' VP';
+
+    const itemsContainer = document.getElementById('bundle-modal-items');
+    itemsContainer.innerHTML = '';
+
+    if (items.length === 0) {
+      itemsContainer.innerHTML = '<div class="text-xs text-gray-400 text-center py-4">Đang đồng bộ 8 vật phẩm của gói...</div>';
+    } else {
+      items.forEach(it => {
+        const isFree = it.discountedPrice === 0;
+        const hasVideo = !!it.video;
+        const itIcon = it.displayIcon || it.icon || 'https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png';
+        
+        itemsContainer.innerHTML += `
+          <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between hover:border-white/20 transition-all">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-10 bg-black/40 rounded-lg flex items-center justify-center p-1 border border-white/5">
+                <img src="${itIcon}" class="max-w-full max-h-full object-contain" alt="${it.name}">
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>${it.name}</span>
+                  ${isFree ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">0 VP</span>' : ''}
+                </div>
+                <div class="text-[10px] text-gray-400 flex items-center gap-1.5 mt-0.5">
+                  <span class="text-amber-400 font-bold">${it.itemType || 'Vũ khí'}</span>
+                  <span>•</span>
+                  <div class="flex items-center gap-1 font-mono text-gray-200">
+                    <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3 h-3 object-contain inline-block">
+                    <span>${isFree ? '0 VP (Tặng kèm)' : it.discountedPrice.toLocaleString() + ' VP'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inspect / Video button -->
+            <button onclick='inspectBundleItem(${JSON.stringify(it).replace(/'/g, "&apos;")})' class="px-2.5 py-1.5 rounded-lg ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/15 text-gray-200'} text-[11px] font-bold flex items-center gap-1 shadow">
+              <span>${hasVideo ? '▶' : '🔍'}</span>
+              <span>${hasVideo ? 'Video' : 'Xem'}</span>
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    document.getElementById('bundle-modal').classList.remove('hidden');
+  }
+
+  function closeFeaturedBundleModal() {
+    document.getElementById('bundle-modal').classList.add('hidden');
+  }
+
+  function inspectBundleItem(it) {
+    openSkinViewer({
+      id: it.uuid,
+      name: it.name,
+      price: it.basePrice || 2175,
+      tier: 'Exclusive',
+      icon: it.displayIcon || it.icon,
+      video: it.video || null,
+      levels: it.levels || [],
+      chromas: it.chromas || []
+    });
+  }
+
+  // ==========================================
+  // SKIN VIEWER & LEVEL/CHROMA MODAL
+  // ==========================================
+  function renderMediaView(videoUrl, iconUrl) {
+    const c = document.getElementById('modal-media-container');
+    if (videoUrl) {
+      c.innerHTML = `
+        <video id="skin-preview-player" src="${videoUrl}" autoplay loop muted playsinline class="w-full h-full object-cover"></video>
+        <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 rounded text-[10px] text-gray-300 font-mono">Video Preview 1080p</div>
+      `;
+    } else {
+      c.innerHTML = `
+        <img src="${iconUrl}" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'" class="max-w-[85%] max-h-[85%] object-contain filter drop-shadow-xl" alt="Preview">
+      `;
+    }
+  }
+
+  function openSkinViewer(skin) {
+    currentActiveSkin = skin;
+    document.getElementById('modal-title').textContent = skin.name || 'Skin Valorant';
+    document.getElementById('modal-tier').textContent = (skin.tier || 'PREMIUM').toUpperCase();
+    document.getElementById('modal-price').textContent = (skin.price || 1775).toLocaleString() + ' VP';
+
+    const video = skin.video || (skin.levels && skin.levels[skin.levels.length - 1] ? skin.levels[skin.levels.length - 1].streamedVideo : null);
+    renderMediaView(video, skin.icon);
+
+    // Levels
+    const lvContainer = document.getElementById('modal-levels-container');
+    const lvWrapper = document.getElementById('modal-levels-wrapper');
+    lvContainer.innerHTML = '';
+    if (skin.levels && skin.levels.length > 0) {
+      lvWrapper.classList.remove('hidden');
+      skin.levels.forEach((lv, idx) => {
+        const hasVid = !!lv.streamedVideo;
+        const btn = document.createElement('button');
+        btn.className = `px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors ${hasVid ? 'bg-white/10 hover:bg-[#ff4655] border-white/20 text-white' : 'bg-black/30 text-gray-500 border-white/5'}`;
+        btn.innerHTML = `Cấp ${idx + 1} ${hasVid ? '▶' : ''}`;
+        btn.onclick = () => {
+          renderMediaView(lv.streamedVideo, lv.displayIcon || skin.icon);
+        };
+        lvContainer.appendChild(btn);
+      });
+    } else {
+      lvWrapper.classList.add('hidden');
+    }
+
+    // Chromas
+    const chrContainer = document.getElementById('modal-chromas-container');
+    const chrWrapper = document.getElementById('modal-chromas-wrapper');
+    chrContainer.innerHTML = '';
+    if (skin.chromas && skin.chromas.length > 1) {
+      chrWrapper.classList.remove('hidden');
+      skin.chromas.forEach((chr, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-[#ff4655] border border-white/20 text-white transition-colors";
+        btn.innerHTML = chr.displayName ? chr.displayName.replace(skin.name, '').trim() || `Màu ${idx + 1}` : `Màu ${idx + 1}`;
+        btn.onclick = () => {
+          renderMediaView(chr.streamedVideo || null, chr.fullRender || chr.displayIcon || skin.icon);
+        };
+        chrContainer.appendChild(btn);
+      });
+    } else {
+      chrWrapper.classList.add('hidden');
+    }
+
+    // Alert button state
+    const alertBtn = document.getElementById('modal-alert-btn');
+    if (wishlistedSkins.includes(skin.name)) {
+      alertBtn.innerHTML = '<span>✓</span> <span>' + (currentLang === 'vi' ? 'Đã thêm vào Hẹn Skin' : 'Added to Watchlist') + '</span>';
+      alertBtn.className = "w-full py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow";
+    } else {
+      alertBtn.innerHTML = '<span>🔔</span> <span>' + i18n[currentLang].addToAlert + '</span>';
+      alertBtn.className = "w-full py-2 bg-[#ff4655] hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow";
+    }
+
+    document.getElementById('skin-modal').classList.remove('hidden');
+  }
+
+  function closeSkinModal() {
+    const p = document.getElementById('skin-preview-player');
+    if (p) { p.pause(); p.src = ''; }
+    document.getElementById('skin-modal').classList.add('hidden');
+  }
+
+  function toggleModalAlertSkin() {
+    if (currentActiveSkin) {
+      toggleWishlist(currentActiveSkin.name);
+      openSkinViewer(currentActiveSkin);
+    }
+  }
+
+  // ==========================================
+  // ALERT SKIN LOGIC (SETTINGS TAB)
+  // ==========================================
+  function handleSkinSearchInput(val) {
+    clearTimeout(searchDebounceTimer);
+    const box = document.getElementById('skin-search-suggestions');
+    const spin = document.getElementById('search-spinner');
+    const q = val.trim();
+
+    if (q.length < 2) {
+      box.classList.add('hidden');
+      box.innerHTML = '';
+      return;
+    }
+
+    spin.classList.remove('hidden');
+    searchDebounceTimer = setTimeout(async () => {
+      const apiHost = getApiHost();
+      try {
+        const res = await fetch(apiHost + '/api/skins/search?q=' + encodeURIComponent(q));
+        const json = await res.json();
+        spin.classList.add('hidden');
+        if (json.success && json.data) {
+          renderSkinSuggestions(json.data);
+        }
+      } catch (e) {
+        spin.classList.add('hidden');
+      }
+    }, 250);
+  }
+
+  function renderSkinSuggestions(skins) {
+    const box = document.getElementById('skin-search-suggestions');
+    box.innerHTML = '';
+    if (!skins || skins.length === 0) {
+      box.innerHTML = '<div class="p-2 text-xs text-gray-400 text-center">' + (currentLang === 'vi' ? 'Không tìm thấy skin nào' : 'No skins found') + '</div>';
+      box.classList.remove('hidden');
+      return;
+    }
+
+    skins.slice(0, 15).forEach(s => {
+      const hasVideo = !!s.video;
+      const row = document.createElement('div');
+      row.className = "flex items-center justify-between p-2 rounded-lg hover:bg-white/10 cursor-pointer transition-colors";
+      row.innerHTML = `
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <img src="${s.icon}" class="w-10 h-6 object-contain flex-shrink-0" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'">
+          <div class="truncate">
+            <div class="text-xs font-bold text-white truncate">${s.name}</div>
+            <div class="text-[10px] text-amber-400 flex items-center gap-1 font-mono">
+              <span>${s.tier || 'Premium'}</span>
+              <span>•</span>
+              <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3 h-3 inline-block">
+              <span>${(s.price || 1775).toLocaleString()} VP</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick='event.stopPropagation(); openSkinViewer(${JSON.stringify(s).replace(/'/g, "&apos;")})' class="px-2 py-1 rounded bg-[#ff4655] hover:bg-red-600 text-white text-[10px] font-bold">
+            ${hasVideo ? '▶ Video' : 'Ảnh'}
+          </button>
+        </div>
+      `;
+      row.onclick = () => selectSkinFromSearch(s);
+      box.appendChild(row);
+    });
+    box.classList.remove('hidden');
+  }
+
+  function selectSkinFromSearch(skin) {
+    document.getElementById('alert-skin-input').value = skin.name;
+    document.getElementById('skin-search-suggestions').classList.add('hidden');
+    openSkinViewer(skin);
+  }
+
+  function addCustomAlertSkin() {
+    const input = document.getElementById('alert-skin-input');
+    const name = input.value.trim();
+    if (name) {
+      toggleWishlist(name);
+      input.value = '';
+      document.getElementById('skin-search-suggestions').classList.add('hidden');
+    }
+  }
+
+  function toggleWishlist(name) {
+    const idx = wishlistedSkins.indexOf(name);
+    if (idx > -1) {
+      wishlistedSkins.splice(idx, 1);
+      showToast((currentLang === 'vi' ? 'Đã hủy hẹn skin: ' : 'Removed alert: ') + name);
+    } else {
+      wishlistedSkins.push(name);
+      showToast((currentLang === 'vi' ? 'Đã hẹn thông báo skin: ' : 'Added alert: ') + name);
+    }
+    localStorage.setItem('val_wishlist', JSON.stringify(wishlistedSkins));
+    renderAlertList();
+  }
+
+  function renderAlertList() {
+    const saved = localStorage.getItem('val_wishlist');
+    if (saved) {
+      try { wishlistedSkins = JSON.parse(saved); } catch (e) {}
+    }
+    const container = document.getElementById('alert-skins-list');
+    if (!container) return;
+    container.innerHTML = '';
+    if (wishlistedSkins.length === 0) {
+      container.innerHTML = '<div class="p-3 text-center text-xs text-gray-500 rounded-xl bg-black/20">' + (currentLang === 'vi' ? 'Chưa có skin nào được hẹn' : 'No alerts configured yet') + '</div>';
+      return;
+    }
+
+    wishlistedSkins.forEach(name => {
+      container.innerHTML += `
+        <div class="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 text-xs animate-pulse">🔔</span>
+            <span class="text-xs font-semibold text-white">${name}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="quickSearchSkin('${name}')" class="text-[10px] text-gray-300 hover:text-white px-2 py-0.5 bg-white/10 rounded-lg border border-white/10">▶ Video</button>
+            <button onclick="toggleWishlist('${name}')" class="text-[10px] text-red-400 hover:text-red-300 px-2 py-0.5 bg-red-950/40 rounded-lg border border-red-900/50">✕</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  async function quickSearchSkin(name) {
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/skins/search?q=' + encodeURIComponent(name));
+      const json = await res.json();
+      if (json.success && json.data && json.data.length > 0) {
+        openSkinViewer(json.data[0]);
+      } else {
+        openSkinViewer({ name, price: 1775, tier: 'Premium', icon: 'https://media.valorant-api.com/weaponskinlevels/4e435234-49a2-1444-4640-908692c855b8/displayicon.png' });
+      }
+    } catch (e) {
+      openSkinViewer({ name, price: 1775, tier: 'Premium', icon: 'https://media.valorant-api.com/weaponskinlevels/4e435234-49a2-1444-4640-908692c855b8/displayicon.png' });
+    }
+  }
+
+  // ==========================================
+  // SKIN LIBRARY CATALOG LOGIC (SUB-TAB IN KHO ĐỒ)
+  // ==========================================
+  function onCatalogSearchInput(val) {
+    clearTimeout(catalogSearchDebounce);
+    const clearBtn = document.getElementById('catalog-search-clear');
+    if (val.trim()) {
+      clearBtn.classList.remove('hidden');
+    } else {
+      clearBtn.classList.add('hidden');
+    }
+    catalogSearchDebounce = setTimeout(() => {
+      loadCatalogSkins(catalogActiveWeapon, catalogActiveTier, val.trim());
+    }, 300);
+  }
+
+  function clearCatalogSearch() {
+    const input = document.getElementById('catalog-search-input');
+    input.value = '';
+    document.getElementById('catalog-search-clear').classList.add('hidden');
+    loadCatalogSkins(catalogActiveWeapon, catalogActiveTier, '');
+  }
+
+  function filterCatalogWeapon(w) {
+    catalogActiveWeapon = w;
+    document.querySelectorAll('.cat-w-chip').forEach(btn => {
+      if (btn.getAttribute('data-weapon') === w) {
+        btn.className = "cat-w-chip px-2.5 py-1 rounded-lg bg-[#ff4655] text-white font-bold whitespace-nowrap shadow";
+      } else {
+        btn.className = "cat-w-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap";
+      }
+    });
+    const q = document.getElementById('catalog-search-input').value.trim();
+    loadCatalogSkins(w, catalogActiveTier, q);
+  }
+
+  function filterCatalogTier(t) {
+    catalogActiveTier = t;
+    document.querySelectorAll('.cat-t-chip').forEach(btn => {
+      if (btn.getAttribute('data-tier') === t) {
+        btn.className = "cat-t-chip px-2 py-0.5 rounded-md bg-white/20 text-white font-bold whitespace-nowrap border border-white/30";
+      } else {
+        btn.className = "cat-t-chip px-2 py-0.5 rounded-md bg-white/5 text-gray-400 hover:text-white font-semibold whitespace-nowrap";
+      }
+    });
+    const q = document.getElementById('catalog-search-input').value.trim();
+    loadCatalogSkins(catalogActiveWeapon, t, q);
+  }
+
+  async function loadCatalogSkins(weapon, tier, query) {
+    const grid = document.getElementById('catalog-skins-grid');
+    const badge = document.getElementById('catalog-count-badge');
+    badge.textContent = 'Đang tra cứu...';
+
+    const apiHost = getApiHost();
+    try {
+      const url = apiHost + '/api/skins?weapon=' + encodeURIComponent(weapon || '') + '&tier=' + encodeURIComponent(tier || '') + '&q=' + encodeURIComponent(query || '') + '&limit=60';
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.success && json.data) {
+        badge.textContent = json.count + ' skins';
+        grid.innerHTML = '';
+        if (json.data.length === 0) {
+          grid.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-8">' + (currentLang === 'vi' ? 'Không tìm thấy skin nào phù hợp bộ lọc.' : 'No skins matching this filter.') + '</div>';
+          return;
+        }
+
+        json.data.forEach(s => {
+          const hasVideo = !!s.video;
+          grid.innerHTML += `
+            <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-[#ff4655]/60 transition-all group">
+              <div class="flex items-center justify-between text-[10px]">
+                <span class="px-1.5 py-0.2 rounded-md bg-white/5 border border-white/10 text-amber-300 font-bold">${s.tier || 'Select'}</span>
+                <div class="flex items-center gap-1 font-mono font-bold text-gray-200">
+                  <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3 h-3 object-contain inline-block">
+                  <span>${(s.price || 1775).toLocaleString()} VP</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-center justify-center h-20">
+                <img src="${s.icon}" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'" class="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-105 transition-transform" alt="${s.name}">
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white truncate mb-2">${s.name}</div>
+                <button onclick='openSkinViewer(${JSON.stringify(s).replace(/'/g, "&apos;")})' class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
+                  <span>${hasVideo ? '▶' : '🔍'}</span> <span>${hasVideo ? 'Xem Video' : 'Xem Ảnh'}</span>
+                </button>
+              </div>
+            </div>
+          `;
+        });
+      }
+    } catch (e) {
+      badge.textContent = 'Lỗi tải';
+      console.warn('Catalog load error:', e.message);
+    }
+  }
+
+  // ==========================================
+  // TAB 3: LIVE PREGAME LOBBY & AGENT SELECTION LOGIC
+  // ==========================================
+  async function loadAllAgents() {
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/agents');
+      const json = await res.json();
+      if (json.success && json.data) {
+        allAgentsList = json.data;
+        renderAgentsRoster(allAgentsList);
+      }
+    } catch (e) {
+      console.warn('Error loading agents:', e.message);
+    }
+  }
+
+  function filterRosterRole(role) {
+    rosterActiveRole = role;
+    document.querySelectorAll('.roster-role-chip').forEach(btn => {
+      if (btn.getAttribute('data-role') === role) {
+        btn.className = "roster-role-chip px-2.5 py-1 rounded-lg bg-[#ff4655] text-white font-bold whitespace-nowrap shadow";
+      } else {
+        btn.className = "roster-role-chip px-2.5 py-1 rounded-lg bg-white/5 text-gray-300 hover:text-white font-bold whitespace-nowrap";
+      }
+    });
+
+    const filtered = role ? allAgentsList.filter(a => (a.role || '').toLowerCase().includes(role.toLowerCase())) : allAgentsList;
+    renderAgentsRoster(filtered);
+  }
+
+  function renderAgentsRoster(agents) {
+    const grid = document.getElementById('roster-agents-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    document.getElementById('roster-count').textContent = agents.length + ' đặc vụ';
+
+    agents.forEach(a => {
+      const isSelected = currentActiveAgent && currentActiveAgent.uuid === a.uuid;
+      const card = document.createElement('div');
+      card.className = `p-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#ff4655] cursor-pointer flex flex-col items-center text-center transition-all ${isSelected ? 'agent-card-active' : ''}`;
+      card.onclick = () => selectRosterAgent(a);
+      card.innerHTML = `
+        <div class="w-10 h-10 rounded-lg overflow-hidden bg-black/40 mb-1 flex items-center justify-center">
+          <img src="${a.displayIcon}" class="w-full h-full object-cover">
+        </div>
+        <span class="text-[10px] font-bold text-white truncate max-w-full">${a.displayName}</span>
+        <span class="text-[8.5px] text-gray-400 truncate max-w-full">${a.role}</span>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function selectRosterAgent(agent) {
+    currentActiveAgent = agent;
+    document.getElementById('active-agent-name').textContent = agent.displayName;
+    document.getElementById('active-agent-role').textContent = agent.role;
+    document.getElementById('active-agent-avatar').src = agent.displayIcon;
+    document.getElementById('active-agent-state').textContent = 'ĐANG CHỌN';
+    document.getElementById('active-agent-state').className = 'text-xs font-black text-amber-400';
+
+    // Highlight card
+    filterRosterRole(rosterActiveRole);
+    showToast('Đã chọn: ' + agent.displayName);
+  }
+
+  async function sendPickAction(action) {
+    if (!currentActiveAgent) return;
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/pregame/' + action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matchId: pregameMatchId, agentId: currentActiveAgent.uuid })
+      });
+      const json = await res.json();
+      if (json.success) {
+        if (action === 'lock') {
+          document.getElementById('active-agent-state').textContent = 'ĐÃ KHÓA';
+          document.getElementById('active-agent-state').className = 'text-xs font-black text-emerald-400';
+          showToast('⚡ ĐÃ KHÓA THÀNH CÔNG: ' + currentActiveAgent.displayName);
+        } else {
+          document.getElementById('active-agent-state').textContent = 'ĐÃ HOVER';
+          showToast('Đã hover: ' + currentActiveAgent.displayName);
+        }
+        await fetchPregameStatus();
+      } else {
+        showToast('Lỗi: ' + (json.message || 'Không thể thực hiện'));
+      }
+    } catch (e) {
+      showToast('Lỗi: ' + e.message);
+    }
+  }
+
+  async function togglePregameDemo() {
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/pregame/demo-toggle', { method: 'POST' });
+      const json = await res.json();
+      const btnText = document.getElementById('btn-demo-text');
+      const cycleBtn = document.getElementById('btn-cycle-map');
+      if (json.isSimulated) {
+        btnText.textContent = 'Tắt Mô Phỏng';
+        if (cycleBtn) cycleBtn.classList.remove('hidden');
+        showToast('Đã bật phòng chờ mô phỏng trực tiếp!');
+      } else {
+        btnText.textContent = 'Bật Mô Phỏng Live';
+        if (cycleBtn) cycleBtn.classList.add('hidden');
+        showToast('Đã tắt phòng chờ mô phỏng');
+      }
+      await fetchPregameStatus();
+    } catch (e) {
+      showToast('Lỗi: ' + e.message);
+    }
+  }
+
+  async function cycleDemoMap() {
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/pregame/demo-map', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const json = await res.json();
+      if (json.success && json.map) {
+        showToast('Đã đổi sang bản đồ: ' + json.map.name);
+        await fetchPregameStatus();
+      }
+    } catch (e) {
+      showToast('Lỗi đổi map: ' + e.message);
+    }
+  }
+
+  async function updateInstalockConfig() {
+    const autoUnrated = document.getElementById('cfg-unrated').checked;
+    const autoCompe = document.getElementById('cfg-competitive').checked;
+    const apiHost = getApiHost();
+    try {
+      await fetch(apiHost + '/api/pregame/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          autoLockUnrated: autoUnrated,
+          autoLockCompetitive: autoCompe,
+          priorityAgent: currentActiveAgent.displayName,
+          priorityAgentId: currentActiveAgent.uuid
+        })
+      });
+      showToast('Đã lưu cấu hình tự động khóa!');
+    } catch (e) {}
+  }
+
+  async function fetchPregameStatus() {
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/pregame/status');
+      const json = await res.json();
+      if (json.success && json.data) {
+        renderPregameLobby(json.data);
+      }
+    } catch (e) {
+      console.warn('Pregame status error:', e.message);
+    }
+  }
+
+  function renderPregameLobby(data) {
+    const mapNameEl = document.getElementById('lobby-map-name');
+    const queueBadgeEl = document.getElementById('lobby-queue-badge');
+    const timerBadgeEl = document.getElementById('lobby-timer-badge');
+    const mapBgEl = document.getElementById('lobby-map-bg');
+    const slotsContainer = document.getElementById('lobby-team-slots');
+    const lockCountEl = document.getElementById('team-lock-count');
+
+    if (data.inPregame) {
+      pregameMatchId = data.matchId;
+      mapNameEl.textContent = data.map?.name || 'ASCENT';
+      queueBadgeEl.textContent = (data.queueName || 'XẾP HẠNG').toUpperCase();
+      timerBadgeEl.textContent = '⏱️ ' + (data.timeRemaining || 30) + 's';
+      if (data.map?.splash) {
+        mapBgEl.style.backgroundImage = `url('${data.map.splash}')`;
+      }
+
+      // Render 5 Team Slots
+      slotsContainer.innerHTML = '';
+      let lockedCount = 0;
+      const team = data.team || [];
+      team.forEach(p => {
+        if (p.state === 'locked') lockedCount++;
+        const isLocked = p.state === 'locked';
+        const isSelected = p.state === 'selected';
+        const hasAgent = !!p.agentIcon;
+
+        const borderClass = isLocked ? 'border-emerald-500/60 bg-emerald-950/30' : (isSelected ? 'border-amber-500/60 bg-amber-950/30' : 'border-white/10 bg-white/5');
+        const badgeClass = isLocked ? 'bg-emerald-500/30 text-emerald-300' : (isSelected ? 'bg-amber-500/30 text-amber-300' : 'bg-gray-800 text-gray-400');
+
+        slotsContainer.innerHTML += `
+          <div class="p-1.5 rounded-xl border ${borderClass} flex flex-col items-center text-center transition-all relative overflow-hidden">
+            ${p.isMe ? '<div class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-[#ff4655]"></div>' : ''}
+            <div class="w-10 h-10 rounded-lg overflow-hidden bg-black/60 mb-1 flex items-center justify-center">
+              ${hasAgent ? `<img src="${p.agentIcon}" class="w-full h-full object-cover">` : '<span class="text-gray-500 text-xs">?</span>'}
+            </div>
+            <span class="text-[9.5px] font-bold text-white truncate max-w-full">${hasAgent ? p.agentName : p.displayName}</span>
+            <span class="text-[8px] font-black px-1 py-0.2 rounded mt-0.5 ${badgeClass}">${p.stateText}</span>
+          </div>
+        `;
+      });
+
+      lockCountEl.textContent = lockedCount + '/5 Đã Khóa';
+    } else {
+      mapNameEl.textContent = 'CHƯA VÀO TRẬN';
+      queueBadgeEl.textContent = 'CHẾ ĐỘ CHỜ (STANDBY)';
+      timerBadgeEl.textContent = '⏱️ --';
+      lockCountEl.textContent = 'Sẵn sàng khi vào phòng chọn tướng';
+      slotsContainer.innerHTML = `
+        <div class="col-span-5 text-center text-xs text-gray-400 py-4 space-y-1">
+          <span class="text-xl block">🟢</span>
+          <div class="font-bold text-white">Đang đợi trận đấu Unrated hoặc Compe...</div>
+          <div class="text-[10px] text-gray-500">Bấm nút "Bật Mô Phỏng Live" ở trên để xem thử giao diện phòng chờ ngay lập tức!</div>
+        </div>
+      `;
+    }
+  }
+
+  // ==========================================
+  // RENDER PLAYER DATA (100% REAL FROM SERVER)
+  // ==========================================
+  function renderPlayerData(d) {
+    if (!d) return;
+    isAuthenticated = true;
+
+    // Reset logout button state in settings
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+      btnLogout.innerHTML = '<span>🚪</span> <span>' + i18n[currentLang].logoutBtn + '</span>';
+      btnLogout.className = "w-full py-2.5 px-3 bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-red-900/60 transition-colors mt-2";
+      btnLogout.onclick = logoutRiot;
+    }
+
+    // A. User Header (100% Dynamic)
+    if (d.user) {
+      currentRiotId = d.user.riotId || (d.user.gameName + '#' + d.user.tagLine);
+      document.getElementById('user-game-name').textContent = d.user.gameName || 'ValorantPlayer';
+      document.getElementById('user-tag-line').textContent = d.user.tagLine ? ('#' + d.user.tagLine) : '';
+      document.getElementById('user-region-badge').textContent = d.user.region || 'AP';
+      document.getElementById('settings-riot-id').textContent = currentRiotId;
+      document.getElementById('settings-region').textContent = d.user.region || 'AP';
+      
+      document.getElementById('user-status-dot').className = 'absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[#090d14]';
+      document.getElementById('user-status-text').textContent = i18n[currentLang].statusConnected;
+      document.getElementById('user-status-text').className = 'text-emerald-400 font-medium';
+
+      if (d.user.playerCardAvatar) {
+        document.getElementById('user-avatar').src = d.user.playerCardAvatar;
+      }
+    }
+
+    // B. Balances (100% Dynamic)
+    if (d.balances) {
+      realVp = d.balances.vp || 0;
+      realRp = d.balances.radianite || 0;
+      realKc = d.balances.kingdomCredits || 0;
+      if (!isBalanceHidden) {
+        document.getElementById('display-vp').textContent = realVp.toLocaleString();
+        document.getElementById('display-rp').textContent = realRp.toLocaleString();
+        document.getElementById('display-kc').textContent = realKc.toLocaleString();
+      }
+    }
+
+    // C. Stats: Level, Rank, Peak Rank, Created At, Valuation (100% Dynamic)
+    if (d.stats) {
+      if (d.stats.level) {
+        document.getElementById('player-level').textContent = d.stats.level;
+        document.getElementById('settings-level').textContent = d.stats.level;
+      }
+      if (d.stats.createdAt) document.getElementById('player-created-at').textContent = d.stats.createdAt;
+      if (d.stats.currentRank) document.getElementById('player-rank').textContent = d.stats.currentRankFull || d.stats.currentRank;
+      if (d.stats.peakRank) document.getElementById('player-peak-rank').textContent = d.stats.peakRank;
+      if (d.stats.skinsCount !== undefined) document.getElementById('skins-count').textContent = d.stats.skinsCount;
+
+      // Render Dynamic Skin Tier Badges
+      const tiersContainer = document.getElementById('skin-tiers-container');
+      if (tiersContainer && d.stats.skinTiers) {
+        tiersContainer.innerHTML = '';
+        const t = d.stats.skinTiers;
+        if (t.exclusive > 0) {
+          tiersContainer.innerHTML += '<span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">' + t.exclusive + ' Exclusive</span>';
+        }
+        if (t.ultra > 0) {
+          tiersContainer.innerHTML += '<span class="px-1.5 py-0.2 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 font-bold">' + t.ultra + ' Ultra</span>';
+        }
+        if (t.premium > 0) {
+          tiersContainer.innerHTML += '<span class="px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">' + t.premium + ' Premium</span>';
+        }
+        if (t.deluxe > 0) {
+          tiersContainer.innerHTML += '<span class="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">' + t.deluxe + ' Deluxe</span>';
+        }
+        if (t.select > 0) {
+          tiersContainer.innerHTML += '<span class="px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold">' + t.select + ' Select</span>';
+        }
+      }
+
+      if (d.stats.mezuValuation) {
+        const m = d.stats.mezuValuation;
+        document.getElementById('mezu-vp').textContent = (m.vp || 0).toLocaleString();
+        document.getElementById('mezu-vnd').textContent = m.vndFormatted || ('~' + (m.vnd || 0).toLocaleString('vi-VN') + ' VNĐ');
+
+        const bdEl = document.getElementById('mezu-breakdown');
+        if (bdEl) {
+          const isVi = currentLang === 'vi';
+          const storeCount = m.storeSkinsCount || 0;
+          const bpCount = m.battlePassCount || 0;
+          const freeCount = (m.freeAgentGunsCount || 0) + (m.freeBpSkinsCount || 0);
+          bdEl.innerHTML = `
+            <span class="text-gray-300 font-medium">${isVi ? 'Cửa hàng' : 'Store'}: <b class="text-white">${storeCount}</b></span>
+            <span>•</span>
+            <span class="text-gray-300 font-medium">Battle Pass: <b class="text-white">${bpCount}</b></span>
+            <span>•</span>
+            <span class="text-emerald-400 font-medium">${isVi ? 'Miễn phí' : 'Free'}: <b class="text-white">${freeCount}</b> (0 VP)</span>
+          `;
+        }
+      }
+    }
+
+    // D. Store Offers & Featured Bundle & Accessory Store (100% Dynamic)
+    if (d.store) {
+      // 1. Daily Offers (with official VP icon)
+      if (d.store.dailyOffers && d.store.dailyOffers.length > 0) {
+        const grid = document.getElementById('daily-skins-grid');
+        grid.innerHTML = '';
+        d.store.dailyOffers.forEach(s => {
+          const hasVideo = !!s.video;
+          grid.innerHTML += `
+            <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-[#ff4655]/60 transition-all group">
+              <div class="flex items-center justify-between text-[10px]">
+                <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-amber-300 font-bold">${s.tier || 'Select'}</span>
+                <div class="flex items-center gap-1 font-mono font-bold text-gray-200">
+                  <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3.5 h-3.5 object-contain inline-block">
+                  <span>${(s.price || 875).toLocaleString()} VP</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-center justify-center h-20">
+                <img src="${s.icon}" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'" class="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-105 transition-transform" alt="${s.name}">
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white truncate mb-2">${s.name}</div>
+                <button onclick='openSkinViewer(${JSON.stringify(s).replace(/'/g, "&apos;")})' class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
+                  <span>${hasVideo ? '▶' : '🔍'}</span> <span>${hasVideo ? i18n[currentLang].viewVideo : i18n[currentLang].viewPhoto}</span>
+                </button>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // 2. Featured Bundle
+      if (d.store.featuredBundles && d.store.featuredBundles.length > 0) {
+        currentBundleData = d.store.featuredBundles[0];
+        const b = currentBundleData;
+        document.getElementById('bundle-banner-name').textContent = b.name || 'Popmonz';
+        document.getElementById('bundle-banner-price').textContent = (b.price || 8700).toLocaleString() + ' VP';
+        if (b.displayIcon) {
+          document.getElementById('bundle-banner-img').src = b.displayIcon;
+        }
+      }
+
+      // 3. Accessory Store (FIXED: Real Icons & Proper Image Rendering)
+      if (d.store.accessoryStore && d.store.accessoryStore.length > 0) {
+        const accGrid = document.getElementById('accessory-store-grid');
+        accGrid.innerHTML = '';
+        d.store.accessoryStore.forEach(acc => {
+          const itemIcon = acc.displayIcon || acc.icon || 'https://media.valorant-api.com/currencies/85ca954a-41f2-ce94-9b45-8ca3dd39a00d/displayicon.png';
+          accGrid.innerHTML += `
+            <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-cyan-500/50 transition-all group">
+              <div class="flex items-center justify-between text-[10px]">
+                <span class="px-2 py-0.5 rounded-md bg-cyan-950/60 border border-cyan-800/40 text-cyan-300 font-bold">${acc.itemType || acc.type || 'Phụ Kiện'}</span>
+                <div class="flex items-center gap-1 font-mono font-bold text-gray-200">
+                  <img src="https://media.valorant-api.com/currencies/85ca954a-41f2-ce94-9b45-8ca3dd39a00d/displayicon.png" class="w-3.5 h-3.5 object-contain inline-block" alt="KC">
+                  <span>${(acc.cost || 4000).toLocaleString()} KC</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-center justify-center h-20">
+                <img src="${itemIcon}" onerror="this.src='https://media.valorant-api.com/currencies/85ca954a-41f2-ce94-9b45-8ca3dd39a00d/displayicon.png'" class="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-105 transition-transform" alt="${acc.name}">
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white truncate mb-1">${acc.name}</div>
+                <div class="text-[10px] text-gray-400 flex items-center justify-between">
+                  <span>Cửa hàng KC</span>
+                  <span class="text-emerald-400 font-semibold">Khả dụng</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    // E. Loadout Weapons
+    if (d.loadout && d.loadout.weapons && d.loadout.weapons.length > 0) {
+      const wList = document.getElementById('weapons-list');
+      wList.innerHTML = '';
+      d.loadout.weapons.forEach(w => {
+        wList.innerHTML += `
+          <div class="glass-card p-3 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img src="${w.icon}" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'" class="w-16 h-8 object-contain">
+              <div>
+                <div class="text-xs font-bold text-white">${w.name}</div>
+                <div class="text-[10px] text-amber-400 font-semibold">${w.tier || 'Standard'}</div>
+              </div>
+            </div>
+            <button onclick="quickSearchSkin('${w.name}')" class="text-xs text-gray-300 hover:text-white px-2.5 py-1 bg-white/10 rounded-xl border border-white/10">▶</button>
+          </div>
+        `;
+      });
+    }
+
+    // F. Accessories
+    if (d.loadout && d.loadout.accessories) {
+      if (d.loadout.accessories.buddies) {
+        const bGrid = document.getElementById('buddies-grid');
+        bGrid.innerHTML = '';
+        d.loadout.accessories.buddies.forEach(b => {
+          bGrid.innerHTML += `
+            <div class="glass-card p-2 rounded-2xl flex flex-col items-center">
+              <img src="${b.displayIcon}" onerror="this.src='https://media.valorant-api.com/buddylevels/cdfc181f-4e27-3bb0-633c-4f8e52348cd0/displayicon.png'" class="w-10 h-10 object-contain">
+              <span class="text-[10px] text-gray-300 mt-1 truncate max-w-full">${b.displayName}</span>
+            </div>
+          `;
+        });
+      }
+      if (d.loadout.accessories.card) {
+        const c = d.loadout.accessories.card;
+        document.getElementById('inv-card-name').textContent = c.displayName;
+        if (c.wideArt || c.largeArt) {
+          document.getElementById('inv-card-img').src = c.wideArt || c.largeArt;
+        }
+      }
+    }
+  }
+
+  // Load live data from server on startup
+  async function loadData() {
+    const apiHost = getApiHost();
+    try {
+      const res = await fetch(apiHost + '/api/player/current');
+      const data = await res.json();
+      if (data.success && data.data) {
+        renderPlayerData(data.data);
+      } else {
+        renderLoggedOutState();
+      }
+    } catch (e) {
+      console.warn('API load error:', e.message);
+    }
+  }
+
+  // Clock
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('current-clock').textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  }, 1000);
+
+  // Store Countdown Timer
+  let countdownSecs = 52000;
+  setInterval(() => {
+    if (countdownSecs > 0) countdownSecs--;
+    const h = Math.floor(countdownSecs / 3600);
+    const m = Math.floor((countdownSecs % 3600) / 60);
+    const s = countdownSecs % 60;
+    const cdEl = document.getElementById('store-countdown');
+    if (cdEl) cdEl.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }, 1000);
+
+  // Accessory Store Weekly Countdown Timer
+  let accessorySecs = 6 * 86400 + 14 * 3600 + 20 * 60;
+  setInterval(() => {
+    if (accessorySecs > 0) accessorySecs--;
+    const d = Math.floor(accessorySecs / 86400);
+    const h = Math.floor((accessorySecs % 86400) / 3600);
+    const m = Math.floor((accessorySecs % 3600) / 60);
+    const accEl = document.getElementById('accessory-countdown');
+    if (accEl) accEl.textContent = d + 'n ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }, 1000);
+
+  // Background Pregame Match Polling (every 3s)
+  pregamePollInterval = setInterval(() => {
+    const agentTab = document.getElementById('tab-agent');
+    if (agentTab && !agentTab.classList.contains('hidden')) {
+      fetchPregameStatus();
+    }
+  }, 3000);
+
+  // Init
+  const hostInput = document.getElementById('settings-server-host');
+  if (hostInput) hostInput.value = localStorage.getItem('skinpeek_server_host') || getApiHost();
+
+  loadData();
+  loadAllAgents();
+  fetchPregameStatus();
+  renderAlertList();
+  </script>
+</body>
+</html>

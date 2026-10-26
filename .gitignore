@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Riot Private Sessions (DO NOT COMMIT)
+server/session.json
+server/session.backup.json
+.env
+
+# Android build outputs & local config
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/build/
+android/app/src/main/assets/public/
+
+# Temporary files & logs
+*.log
+*.tmp
+*.bak
+scratch/
+exact-user-url.txt

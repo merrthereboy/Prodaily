@@ -1,0 +1,28 @@
+{
+  "name": "valorant-skinpeek-mobile",
+  "version": "1.0.0",
+  "description": "Valorant Mobile Store Checker, Inventory Inspector, Remote Agent Picker/Locker, and Spending Tracker powered by SkinPeek Riot API",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "node build.js",
+    "cap:sync": "cap sync android",
+    "cap:open": "cap open android",
+    "cap:build": "cap build android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/haptics": "^6.0.1",
+    "@capacitor/local-notifications": "^6.0.2",
+    "@capacitor/preferences": "^6.0.2",
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {},
+  "author": "SkinPeek Mobile",
+  "license": "MIT"
+}
