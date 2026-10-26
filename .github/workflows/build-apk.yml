@@ -44,33 +44,38 @@ jobs:
 
       - name: 📦 Rename APK for Release
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk Prodaily-v1.0.0.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk Prodaily-v1.0.1.apk
 
       - name: 🚀 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Prodaily-v1.0.0.apk
-          path: Prodaily-v1.0.0.apk
+          name: Prodaily-v1.0.1.apk
+          path: Prodaily-v1.0.1.apk
           retention-days: 30
 
       - name: 📢 Auto Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: Prodaily v1.0.0 - Valorant Mobile Assistant
+          tag_name: v1.0.1
+          name: Prodaily v1.0.1 - Standalone Mobile Edition
           body: |
-            📱 **Prodaily v1.0.0 - Bản phát hành chính thức dành cho Android**
+            📱 **Prodaily v1.0.1 - Bản cập nhật Độc Lập 100% cho Android (Không cần máy tính)**
 
-            ✨ **Tính năng nổi bật:**
-            - 🛒 **Xem Shop & Chợ Đêm:** Xem 4 skin hàng ngày và chợ đêm với video hoạt ảnh cấp độ, biến thể màu sắc.
+            🌟 **Thay đổi & Nâng cấp quan trọng:**
+            - 🚀 **100% Standalone Mobile:** Ứng dụng chạy trực tiếp trên điện thoại, tự động kết nối Riot Games API thông qua Android Native HTTP (CapacitorHttp). Không cần bật máy tính hay chạy server!
+            - 📶 **Hỗ trợ 4G/5G & Mọi mạng Wi-Fi:** Khắc phục triệt để lỗi "Lỗi kết nối máy chủ" và lỗi bảo mật Mixed Content trên Android.
+            - 💾 **Cache tức thì:** Lưu phiên đăng nhập an toàn trong máy, mở app tải ngay 0 giây.
+
+            ✨ **Tính năng đầy đủ:**
+            - 🛒 **Xem Shop & Chợ Đêm:** Xem 4 skin hàng ngày, video skin, nâng cấp cấp độ & biến thể màu.
             - 🎒 **Kho Đồ & Thư Viện Skin:** Tra cứu toàn bộ skin súng, dao, thẻ bài và kho đồ cá nhân.
-            - ⚡ **Pick & Khóa Tướng Từ Xa (Remote Instalock):** Hỗ trợ Unrated và Competitive, tự nhận diện map và đội hình.
-            - 💎 **Định Giá Tài Khoản Chuẩn Mezu:** Tính tổng số tiền đã nạp theo tỷ giá ZaloPay chính hãng.
+            - ⚡ **Pick & Khóa Tướng Từ Xa (Remote Instalock):** Tự động nhận diện map và khóa đặc vụ ưu tiên.
+            - 💎 **Định Giá Tài Khoản Chuẩn Mezu:** Tính chi tiết số tiền đã nạp theo bảng giá nạp ZaloPay chính hãng.
             - 🛡️ **Tiện Ích:** Chế độ ẩn số dư ví, đổi ngôn ngữ Việt - Anh, hẹn skin yêu thích.
 
             👤 Tác giả: **merrthereboy**  
             💬 Cộng đồng Discord: https://discord.com/invite/z4jUC4v8W2
-          files: Prodaily-v1.0.0.apk
+          files: Prodaily-v1.0.1.apk
           draft: false
           prerelease: false
         env:
