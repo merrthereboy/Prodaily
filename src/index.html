@@ -95,12 +95,12 @@
       <!-- Top Bar: Clock, App Brand & Header 3-Dots Button -->
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2">
-          <!-- ProDaily Brand -->
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#ff4655] animate-pulse"></span>
+          <!-- ProDaily Brand with Custom Logo -->
+          <div class="flex items-center gap-2">
+            <img src="assets/icon-192.png" class="w-6 h-6 rounded-lg object-contain border border-[#ff4655]/50 shadow-md shadow-[#ff4655]/20" alt="Logo">
             <span class="font-mono font-black text-xs tracking-wider text-white">PRO<span class="text-[#ff4655]">DAILY</span></span>
           </div>
-          <span class="text-[10px] text-gray-500 font-mono">v2.5</span>
+          <span class="text-[10px] text-gray-500 font-mono">v1.0.2</span>
         </div>
         
         <div class="flex items-center gap-2">
@@ -415,7 +415,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span class="text-[11px] font-black uppercase tracking-wider text-white" id="lobby-status-title">PHÒNG CHỜ CHỌN TƯỚNG LIVE</span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-white" id="lobby-status-title">PEEK TƯỚNG & PHÒNG CHỜ LIVE</span>
               </div>
               <div class="flex items-center gap-1.5">
                 <span id="lobby-queue-badge" class="px-2 py-0.5 rounded-lg bg-[#ff4655] text-white font-black text-[10px] uppercase shadow">XẾP HẠNG (COMPE)</span>
@@ -436,9 +436,14 @@
                   </button>
                 </div>
               </div>
-              <button onclick="togglePregameDemo()" class="text-[10px] px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 border border-white/15 font-bold flex items-center gap-1 transition-colors">
-                <span>🧪</span> <span id="btn-demo-text">Bật Mô Phỏng Live</span>
-              </button>
+              <div class="flex items-center gap-1.5">
+                <button onclick="manualCheckPregame()" class="text-[10px] px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold flex items-center gap-1 transition-all" title="Quét trạng thái trận đấu ngay">
+                  <span>🔄</span> <span>Quét Trận</span>
+                </button>
+                <button onclick="togglePregameDemo()" class="text-[10px] px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 border border-white/15 font-bold flex items-center gap-1 transition-colors">
+                  <span>🧪</span> <span id="btn-demo-text">Mô Phỏng</span>
+                </button>
+              </div>
             </div>
 
             <!-- Auto-Lock Modes Supported Checkboxes -->
@@ -464,7 +469,7 @@
         <div class="glass-card p-3 rounded-2xl space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
-              <span>👥</span> <span>Đội Hình Team Của Bạn (5 Vị Trí)</span>
+              <span>👥</span> <span>Peek Đội Hình Team (5 Vị Trí)</span>
             </span>
             <span class="text-[10px] text-gray-400" id="team-lock-count">2/5 Đã Khóa</span>
           </div>
@@ -607,6 +612,13 @@
             <div id="skin-search-suggestions" class="hidden absolute left-0 right-0 top-11 bg-[#0b1018] border border-white/15 rounded-xl shadow-2xl p-1.5 z-40 max-h-60 overflow-y-auto space-y-1"></div>
           </div>
 
+          <!-- Notification Status & Test Notification Button -->
+          <div class="mt-3">
+            <button onclick="testNotificationBanner()" class="w-full py-2 px-3 bg-gradient-to-r from-amber-500/20 to-[#ff4655]/20 hover:from-amber-500/30 hover:to-[#ff4655]/30 text-amber-300 rounded-xl text-[11px] font-bold border border-amber-500/30 flex items-center justify-center gap-1.5 transition-all shadow">
+              <span>🔔</span> <span>Thử nghiệm nhận thông báo trên điện thoại</span>
+            </button>
+          </div>
+
           <!-- Alert Skins List -->
           <div class="mt-3.5 space-y-1.5" id="alert-skins-list"></div>
         </div>
@@ -687,11 +699,12 @@
         <span data-i18n="navInventory">Kho đồ</span>
       </button>
 
-      <!-- CENTER FLOATING ACTION BUTTON (PICK TƯỚNG / LOBBY) -->
-      <div class="relative -top-5 flex-1 flex justify-center">
-        <button onclick="switchTab('agent')" id="nav-agent" class="w-14 h-14 rounded-full floating-center-action flex items-center justify-center text-white shadow-2xl transition-all cursor-pointer group" title="Phòng chờ & Khóa tướng">
+      <!-- CENTER FLOATING ACTION BUTTON (PEEK TƯỚNG / LOBBY) -->
+      <div class="relative -top-3.5 flex-1 flex flex-col items-center justify-center">
+        <button onclick="switchTab('agent')" id="nav-agent" class="w-13 h-13 rounded-full floating-center-action flex items-center justify-center text-white shadow-2xl transition-all cursor-pointer group" title="Peek Tướng & Khóa Tướng">
           <span class="text-2xl group-hover:scale-110 transition-transform">⚡</span>
         </button>
+        <span id="nav-agent-label" class="text-[9.5px] font-black text-amber-300 tracking-tight mt-0.5">Peek Tướng</span>
       </div>
 
       <!-- Nav 3: Chợ Đêm -->
@@ -848,6 +861,32 @@
     </div>
   </div>
 
+  <!-- Live Match Detected Modal -->
+  <div id="live-match-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-sm bg-[#0e141e] border-2 border-[#ff4655] rounded-3xl p-5 shadow-[0_0_40px_rgba(255,70,85,0.4)] overflow-hidden">
+      <!-- Background Map Image -->
+      <img id="match-modal-bg" src="" class="absolute inset-0 w-full h-full object-cover opacity-25 filter blur-sm pointer-events-none">
+      <div class="relative z-10 space-y-3.5 text-center">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff4655]/25 border border-[#ff4655] text-[#ff4655] text-[10px] font-black uppercase tracking-wider animate-pulse">
+          <span>●</span> <span>ĐÃ TÌM THẤY TRẬN ĐẤU VALORANT!</span>
+        </div>
+        <div>
+          <h3 class="text-2xl font-black text-white uppercase tracking-tight" id="match-modal-map">ASCENT</h3>
+          <p class="text-xs text-amber-300 font-bold font-mono mt-0.5" id="match-modal-queue">ĐẤU XẾP HẠNG (COMPETITIVE)</p>
+        </div>
+        <p class="text-xs text-gray-300 leading-relaxed">Đang trong phòng chờ chọn tướng. Bạn có thể peek đội hình hoặc chọn và khóa ngay tướng trên điện thoại!</p>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="dismissMatchModal()" class="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 text-xs font-bold transition-all">
+            Để Sau
+          </button>
+          <button onclick="openPregameTabFromModal()" class="py-2.5 px-3 rounded-xl bg-[#ff4655] hover:bg-red-600 text-white text-xs font-black shadow-lg shadow-[#ff4655]/40 transition-all flex items-center justify-center gap-1">
+            <span>⚡ Peek Tướng</span> <span>➔</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="hidden fixed bottom-20 z-50 px-4 py-2 bg-[#ff4655] text-white text-xs font-bold rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce">
     <span>✓</span>
@@ -905,6 +944,13 @@
     role: 'Đối Đầu (Duelist)',
     displayIcon: 'https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png'
   };
+  try {
+    const savedAgent = localStorage.getItem('prodaily_priority_agent');
+    if (savedAgent) {
+      const parsed = JSON.parse(savedAgent);
+      if (parsed && parsed.uuid) currentActiveAgent = parsed;
+    }
+  } catch (e) {}
   let pregameMatchId = 'simulated-match-live';
   let pregamePollInterval = null;
   let rosterActiveRole = '';
@@ -1389,15 +1435,71 @@
   }
 
   // ==========================================
-  // SKIN VIEWER & LEVEL/CHROMA MODAL
+  // GLOBAL SKIN REFERENCES & CACHES (NO STRINGIFY IN HTML)
   // ==========================================
+  window.__shopDailySkins = [];
+  window.__catalogSkins = [];
+  window.__searchSkins = [];
+  window.__bundleItems = [];
+
+  function openSkinViewerByIndex(type, index) {
+    let list = [];
+    if (type === 'daily') list = window.__shopDailySkins;
+    else if (type === 'catalog') list = window.__catalogSkins;
+    else if (type === 'search') list = window.__searchSkins;
+    else if (type === 'bundle') list = window.__bundleItems;
+
+    if (list && list[index]) {
+      openSkinViewer(list[index]);
+    }
+  }
+
+  // ==========================================
+  // SKIN VIEWER & LEVEL/CHROMA MODAL WITH FULL AUDIO SUPPORT
+  // ==========================================
+  let isVideoAudioMuted = false;
+
+  function toggleVideoSound() {
+    const v = document.getElementById('skin-preview-player');
+    const btn = document.getElementById('video-sound-toggle-btn');
+    if (!v) return;
+    v.muted = !v.muted;
+    isVideoAudioMuted = v.muted;
+    if (!v.muted) v.volume = 1.0;
+    if (btn) {
+      btn.innerHTML = v.muted ? '<span>🔇</span> <span>Đang tắt tiếng (Chạm để bật)</span>' : '<span>🔊</span> <span>Âm thanh đang bật</span>';
+      btn.className = v.muted 
+        ? "absolute top-3 left-3 px-2.5 py-1 bg-black/80 hover:bg-black/95 text-amber-300 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all border border-amber-500/40 shadow-lg z-20"
+        : "absolute top-3 left-3 px-2.5 py-1 bg-[#ff4655] hover:bg-red-600 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-lg z-20 animate-pulse";
+    }
+  }
+
   function renderMediaView(videoUrl, iconUrl) {
     const c = document.getElementById('modal-media-container');
     if (videoUrl) {
       c.innerHTML = `
-        <video id="skin-preview-player" src="${videoUrl}" autoplay loop muted playsinline class="w-full h-full object-cover"></video>
-        <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 rounded text-[10px] text-gray-300 font-mono">Video Preview 1080p</div>
+        <video id="skin-preview-player" src="${videoUrl}" playsinline class="w-full h-full object-cover"></video>
+        <button id="video-sound-toggle-btn" onclick="toggleVideoSound()" class="absolute top-3 left-3 px-2.5 py-1 bg-[#ff4655] hover:bg-red-600 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-lg z-20">
+          <span>🔊</span> <span>Âm thanh đang bật</span>
+        </button>
+        <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 rounded text-[10px] text-gray-300 font-mono">1080p HD Video</div>
       `;
+      const v = document.getElementById('skin-preview-player');
+      v.loop = true;
+      v.volume = 1.0;
+      v.muted = isVideoAudioMuted;
+      const playPromise = v.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          v.muted = true;
+          v.play();
+          const btn = document.getElementById('video-sound-toggle-btn');
+          if (btn) {
+            btn.innerHTML = '<span>🔇</span> <span>Chạm để Bật âm thanh</span>';
+            btn.className = 'absolute top-3 left-3 px-2.5 py-1 bg-black/80 text-amber-300 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all border border-amber-500/40 shadow-lg z-20 animate-pulse';
+          }
+        });
+      }
     } else {
       c.innerHTML = `
         <img src="${iconUrl}" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'" class="max-w-[85%] max-h-[85%] object-contain filter drop-shadow-xl" alt="Preview">
@@ -1406,27 +1508,37 @@
   }
 
   function openSkinViewer(skin) {
+    if (!skin) return;
     currentActiveSkin = skin;
-    document.getElementById('modal-title').textContent = skin.name || 'Skin Valorant';
-    document.getElementById('modal-tier').textContent = (skin.tier || 'PREMIUM').toUpperCase();
-    document.getElementById('modal-price').textContent = (skin.price || 1775).toLocaleString() + ' VP';
+    const name = skin.name || skin.displayName || 'Skin Valorant';
+    const tier = (skin.tier || skin.tierName || 'PREMIUM').toUpperCase();
+    const price = (skin.price || 1775).toLocaleString() + ' VP';
 
-    const video = skin.video || (skin.levels && skin.levels[skin.levels.length - 1] ? skin.levels[skin.levels.length - 1].streamedVideo : null);
-    renderMediaView(video, skin.icon);
+    document.getElementById('modal-title').textContent = name;
+    document.getElementById('modal-tier').textContent = tier;
+    document.getElementById('modal-price').textContent = price;
+
+    const rawLevels = skin.levels || [];
+    let initialVideo = skin.video || skin.streamedVideo;
+    if (!initialVideo && rawLevels.length > 0) {
+      initialVideo = [...rawLevels].reverse().find(l => l.streamedVideo || l.video)?.streamedVideo || null;
+    }
+    renderMediaView(initialVideo, skin.icon || skin.displayIcon);
 
     // Levels
     const lvContainer = document.getElementById('modal-levels-container');
     const lvWrapper = document.getElementById('modal-levels-wrapper');
     lvContainer.innerHTML = '';
-    if (skin.levels && skin.levels.length > 0) {
+    if (rawLevels && rawLevels.length > 0) {
       lvWrapper.classList.remove('hidden');
-      skin.levels.forEach((lv, idx) => {
-        const hasVid = !!lv.streamedVideo;
+      rawLevels.forEach((lv, idx) => {
+        const vid = lv.streamedVideo || lv.video;
+        const hasVid = !!vid;
         const btn = document.createElement('button');
         btn.className = `px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors ${hasVid ? 'bg-white/10 hover:bg-[#ff4655] border-white/20 text-white' : 'bg-black/30 text-gray-500 border-white/5'}`;
         btn.innerHTML = `Cấp ${idx + 1} ${hasVid ? '▶' : ''}`;
         btn.onclick = () => {
-          renderMediaView(lv.streamedVideo, lv.displayIcon || skin.icon);
+          renderMediaView(vid || initialVideo, lv.displayIcon || skin.icon || skin.displayIcon);
         };
         lvContainer.appendChild(btn);
       });
@@ -1438,14 +1550,15 @@
     const chrContainer = document.getElementById('modal-chromas-container');
     const chrWrapper = document.getElementById('modal-chromas-wrapper');
     chrContainer.innerHTML = '';
-    if (skin.chromas && skin.chromas.length > 1) {
+    const rawChromas = skin.chromas || [];
+    if (rawChromas && rawChromas.length > 1) {
       chrWrapper.classList.remove('hidden');
-      skin.chromas.forEach((chr, idx) => {
+      rawChromas.forEach((chr, idx) => {
         const btn = document.createElement('button');
         btn.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-[#ff4655] border border-white/20 text-white transition-colors";
-        btn.innerHTML = chr.displayName ? chr.displayName.replace(skin.name, '').trim() || `Màu ${idx + 1}` : `Màu ${idx + 1}`;
+        btn.innerHTML = chr.displayName ? chr.displayName.replace(name, '').trim() || `Màu ${idx + 1}` : `Màu ${idx + 1}`;
         btn.onclick = () => {
-          renderMediaView(chr.streamedVideo || null, chr.fullRender || chr.displayIcon || skin.icon);
+          renderMediaView(chr.streamedVideo || chr.video || null, chr.fullRender || chr.displayIcon || skin.icon || skin.displayIcon);
         };
         chrContainer.appendChild(btn);
       });
@@ -1455,7 +1568,7 @@
 
     // Alert button state
     const alertBtn = document.getElementById('modal-alert-btn');
-    if (wishlistedSkins.includes(skin.name)) {
+    if (wishlistedSkins.includes(name)) {
       alertBtn.innerHTML = '<span>✓</span> <span>' + (currentLang === 'vi' ? 'Đã thêm vào Hẹn Skin' : 'Added to Watchlist') + '</span>';
       alertBtn.className = "w-full py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow";
     } else {
@@ -1519,31 +1632,37 @@
   function renderSkinSuggestions(skins) {
     const box = document.getElementById('skin-search-suggestions');
     box.innerHTML = '';
+    window.__searchSkins = skins || [];
     if (!skins || skins.length === 0) {
       box.innerHTML = '<div class="p-2 text-xs text-gray-400 text-center">' + (currentLang === 'vi' ? 'Không tìm thấy skin nào' : 'No skins found') + '</div>';
       box.classList.remove('hidden');
       return;
     }
 
-    skins.slice(0, 15).forEach(s => {
-      const hasVideo = !!s.video;
+    skins.slice(0, 15).forEach((s, idx) => {
+      const name = s.name || s.displayName || 'Skin Valorant';
+      const icon = s.icon || s.displayIcon || 'https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png';
+      const tier = s.tier || s.tierName || 'Premium';
+      const price = s.price || 1775;
+      const hasVideo = !!(s.video || s.streamedVideo);
+
       const row = document.createElement('div');
       row.className = "flex items-center justify-between p-2 rounded-lg hover:bg-white/10 cursor-pointer transition-colors";
       row.innerHTML = `
         <div class="flex items-center gap-2.5 overflow-hidden">
-          <img src="${s.icon}" class="w-10 h-6 object-contain flex-shrink-0" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'">
+          <img src="${icon}" class="w-10 h-6 object-contain flex-shrink-0" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'">
           <div class="truncate">
-            <div class="text-xs font-bold text-white truncate">${s.name}</div>
+            <div class="text-xs font-bold text-white truncate">${name}</div>
             <div class="text-[10px] text-amber-400 flex items-center gap-1 font-mono">
-              <span>${s.tier || 'Premium'}</span>
+              <span>${tier}</span>
               <span>•</span>
               <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3 h-3 inline-block">
-              <span>${(s.price || 1775).toLocaleString()} VP</span>
+              <span>${price.toLocaleString()} VP</span>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-1">
-          <button onclick='event.stopPropagation(); openSkinViewer(${JSON.stringify(s).replace(/'/g, "&apos;")})' class="px-2 py-1 rounded bg-[#ff4655] hover:bg-red-600 text-white text-[10px] font-bold">
+          <button onclick="event.stopPropagation(); openSkinViewerByIndex('search', ${idx})" class="px-2 py-1 rounded bg-[#ff4655] hover:bg-red-600 text-white text-[10px] font-bold">
             ${hasVideo ? '▶ Video' : 'Ảnh'}
           </button>
         </div>
@@ -1555,7 +1674,8 @@
   }
 
   function selectSkinFromSearch(skin) {
-    document.getElementById('alert-skin-input').value = skin.name;
+    const name = skin.name || skin.displayName;
+    document.getElementById('alert-skin-input').value = name;
     document.getElementById('skin-search-suggestions').classList.add('hidden');
     openSkinViewer(skin);
   }
@@ -1570,7 +1690,7 @@
     }
   }
 
-  function toggleWishlist(name) {
+  async function toggleWishlist(name) {
     const idx = wishlistedSkins.indexOf(name);
     if (idx > -1) {
       wishlistedSkins.splice(idx, 1);
@@ -1578,9 +1698,16 @@
     } else {
       wishlistedSkins.push(name);
       showToast((currentLang === 'vi' ? 'Đã hẹn thông báo skin: ' : 'Added alert: ') + name);
+      // Trigger native notification permission and confirmation
+      await requestNotificationPermission();
+      sendNativeNotification(
+        '🔔 ĐÃ HẸN THÔNG BÁO SKIN!',
+        `Prodaily sẽ tự động gửi thông báo khi ${name} xuất hiện trong Cửa Hàng hoặc Chợ Đêm!`
+      );
     }
     localStorage.setItem('val_wishlist', JSON.stringify(wishlistedSkins));
     renderAlertList();
+    loadData(); // Re-render shop cards with wishlist highlights
   }
 
   function renderAlertList() {
@@ -1684,19 +1811,19 @@
     // 1. Standalone Direct Search (Instant 0-latency)
     if (window.ClientRiotEngine && ClientRiotEngine.skinCache.size > 0) {
       const skins = ClientRiotEngine.searchSkins(query, weapon, tier, 60);
+      window.__catalogSkins = skins;
       badge.textContent = skins.length + ' skins';
       grid.innerHTML = '';
       if (skins.length === 0) {
         grid.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-8">' + (currentLang === 'vi' ? 'Không tìm thấy skin nào phù hợp bộ lọc.' : 'No skins matching this filter.') + '</div>';
         return;
       }
-      skins.forEach(s => {
-        const hasVideo = !!s.video || !!s.streamedVideo;
+      skins.forEach((s, idx) => {
+        const hasVideo = !!(s.video || s.streamedVideo);
         const icon = s.icon || s.displayIcon;
         const name = s.name || s.displayName;
         const tierName = s.tier || s.tierName || 'Select';
         const price = s.price || ClientRiotEngineClass.estimatePrice(tierName);
-        const skinObj = { ...s, name, icon, tier: tierName, price, video: s.video || s.streamedVideo };
 
         grid.innerHTML += `
           <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-[#ff4655]/60 transition-all group">
@@ -1712,7 +1839,7 @@
             </div>
             <div>
               <div class="text-xs font-bold text-white truncate mb-2">${name}</div>
-              <button onclick='openSkinViewer(${JSON.stringify(skinObj).replace(/'/g, "&apos;")})' class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
+              <button onclick="openSkinViewerByIndex('catalog', ${idx})" class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
                 <span>${hasVideo ? '▶' : '🔍'}</span> <span>${hasVideo ? 'Xem Video' : 'Xem Ảnh'}</span>
               </button>
             </div>
@@ -1728,6 +1855,7 @@
       const res = await fetch(url);
       const json = await res.json();
       if (json.success && json.data) {
+        window.__catalogSkins = json.data;
         badge.textContent = json.count + ' skins';
         grid.innerHTML = '';
         if (json.data.length === 0) {
@@ -1735,8 +1863,8 @@
           return;
         }
 
-        json.data.forEach(s => {
-          const hasVideo = !!s.video;
+        json.data.forEach((s, idx) => {
+          const hasVideo = !!(s.video || s.streamedVideo);
           grid.innerHTML += `
             <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-[#ff4655]/60 transition-all group">
               <div class="flex items-center justify-between text-[10px]">
@@ -1751,7 +1879,7 @@
               </div>
               <div>
                 <div class="text-xs font-bold text-white truncate mb-2">${s.name}</div>
-                <button onclick='openSkinViewer(${JSON.stringify(s).replace(/'/g, "&apos;")})' class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
+                <button onclick="openSkinViewerByIndex('catalog', ${idx})" class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
                   <span>${hasVideo ? '▶' : '🔍'}</span> <span>${hasVideo ? 'Xem Video' : 'Xem Ảnh'}</span>
                 </button>
               </div>
@@ -1825,21 +1953,43 @@
 
   function selectRosterAgent(agent) {
     currentActiveAgent = agent;
+    try {
+      localStorage.setItem('prodaily_priority_agent', JSON.stringify(agent));
+    } catch (e) {}
     document.getElementById('active-agent-name').textContent = agent.displayName;
     document.getElementById('active-agent-role').textContent = agent.role;
     document.getElementById('active-agent-avatar').src = agent.displayIcon;
     document.getElementById('active-agent-state').textContent = 'ĐANG CHỌN';
     document.getElementById('active-agent-state').className = 'text-xs font-black text-amber-400';
 
+    if (isClientDemoActive) {
+      renderPregameLobby(getClientDemoLobby());
+    }
+
     // Highlight card
     filterRosterRole(rosterActiveRole);
-    showToast('Đã chọn: ' + agent.displayName);
+    showToast('Đã chọn đặc vụ ưu tiên: ' + agent.displayName);
   }
 
   async function sendPickAction(action) {
     if (!currentActiveAgent) return;
-    const apiHost = getApiHost();
     try {
+      if (window.ClientRiotEngine && ClientRiotEngine.hasSession() && pregameMatchId) {
+        if (action === 'lock') {
+          await ClientRiotEngine.lockAgent(pregameMatchId, currentActiveAgent.uuid);
+          document.getElementById('active-agent-state').textContent = 'ĐÃ KHÓA';
+          document.getElementById('active-agent-state').className = 'text-xs font-black text-emerald-400';
+          showToast('⚡ ĐÃ KHÓA THÀNH CÔNG: ' + currentActiveAgent.displayName);
+        } else {
+          await ClientRiotEngine.selectAgent(pregameMatchId, currentActiveAgent.uuid);
+          document.getElementById('active-agent-state').textContent = 'ĐÃ HOVER';
+          showToast('Đã hover: ' + currentActiveAgent.displayName);
+        }
+        await fetchPregameStatus();
+        return;
+      }
+
+      const apiHost = getApiHost();
       const res = await fetch(apiHost + '/api/pregame/' + action, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1864,75 +2014,110 @@
     }
   }
 
+  let isClientDemoActive = false;
+  let clientDemoMapIdx = 0;
+  const clientDemoMaps = [
+    { name: 'ASCENT', splash: 'https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/splash.png' },
+    { name: 'BIND', splash: 'https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/splash.png' },
+    { name: 'HAVEN', splash: 'https://media.valorant-api.com/maps/2bee0fed-408b-0a37-537a-4da119be2382/splash.png' },
+    { name: 'SUNSET', splash: 'https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9fac-be9e4a76ff4a/splash.png' },
+    { name: 'LOTUS', splash: 'https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/splash.png' }
+  ];
+
+  function getClientDemoLobby() {
+    const curMap = clientDemoMaps[clientDemoMapIdx % clientDemoMaps.length];
+    return {
+      inPregame: true,
+      matchId: 'simulated-demo-match',
+      queueId: 'competitive',
+      isSupportedMode: true,
+      queueName: 'ĐẤU XẾP HẠNG (COMPETITIVE)',
+      timeRemaining: 28,
+      map: curMap,
+      team: [
+        { slot: 1, isMe: true, displayName: 'Bạn (Self)', agentName: currentActiveAgent?.displayName || 'Jett', agentIcon: currentActiveAgent?.displayIcon || 'https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png', state: 'selected', stateText: 'ĐANG CHỌN' },
+        { slot: 2, isMe: false, displayName: 'Đồng đội 2', agentName: 'Omen', agentIcon: 'https://media.valorant-api.com/agents/8e253930-4c05-31dd-169c-945a50845c4b/displayicon.png', state: 'locked', stateText: 'ĐÃ KHÓA' },
+        { slot: 3, isMe: false, displayName: 'Đồng đội 3', agentName: 'Sova', agentIcon: 'https://media.valorant-api.com/agents/ded3520f-4264-bfed-162d-a080e2ab5f1f/displayicon.png', state: 'locked', stateText: 'ĐÃ KHÓA' },
+        { slot: 4, isMe: false, displayName: 'Đồng đội 4', agentName: 'Killjoy', agentIcon: 'https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png', state: 'selected', stateText: 'ĐANG CHỌN' },
+        { slot: 5, isMe: false, displayName: 'Đồng đội 5', agentName: 'Chưa chọn', agentIcon: null, state: 'choosing', stateText: 'CHƯA CHỌN' }
+      ]
+    };
+  }
+
   async function togglePregameDemo() {
-    const apiHost = getApiHost();
-    try {
-      const res = await fetch(apiHost + '/api/pregame/demo-toggle', { method: 'POST' });
-      const json = await res.json();
-      const btnText = document.getElementById('btn-demo-text');
-      const cycleBtn = document.getElementById('btn-cycle-map');
-      if (json.isSimulated) {
-        btnText.textContent = 'Tắt Mô Phỏng';
-        if (cycleBtn) cycleBtn.classList.remove('hidden');
-        showToast('Đã bật phòng chờ mô phỏng trực tiếp!');
-      } else {
-        btnText.textContent = 'Bật Mô Phỏng Live';
-        if (cycleBtn) cycleBtn.classList.add('hidden');
-        showToast('Đã tắt phòng chờ mô phỏng');
-      }
+    isClientDemoActive = !isClientDemoActive;
+    const btnText = document.getElementById('btn-demo-text');
+    const cycleBtn = document.getElementById('btn-cycle-map');
+    if (isClientDemoActive) {
+      if (btnText) btnText.textContent = 'Tắt Mô Phỏng';
+      if (cycleBtn) cycleBtn.classList.remove('hidden');
+      renderPregameLobby(getClientDemoLobby());
+      showToast('Đã bật chế độ Peek Tướng mô phỏng!');
+    } else {
+      if (btnText) btnText.textContent = 'Mô Phỏng';
+      if (cycleBtn) cycleBtn.classList.add('hidden');
+      showToast('Đã tắt mô phỏng');
       await fetchPregameStatus();
-    } catch (e) {
-      showToast('Lỗi: ' + e.message);
     }
   }
 
   async function cycleDemoMap() {
-    const apiHost = getApiHost();
-    try {
-      const res = await fetch(apiHost + '/api/pregame/demo-map', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      });
-      const json = await res.json();
-      if (json.success && json.map) {
-        showToast('Đã đổi sang bản đồ: ' + json.map.name);
-        await fetchPregameStatus();
-      }
-    } catch (e) {
-      showToast('Lỗi đổi map: ' + e.message);
+    clientDemoMapIdx = (clientDemoMapIdx + 1) % clientDemoMaps.length;
+    const curMap = clientDemoMaps[clientDemoMapIdx];
+    showToast('Đã đổi sang bản đồ: ' + curMap.name);
+    renderPregameLobby(getClientDemoLobby());
+  }
+
+  async function manualCheckPregame() {
+    showToast('🔄 Đang quét trạng thái trận đấu...');
+    let found = false;
+    if (window.ClientRiotEngine && ClientRiotEngine.hasSession()) {
+      try {
+        const data = await ClientRiotEngine.getPregameMatch();
+        if (data && data.inPregame) {
+          found = true;
+          checkLivePregameMatch();
+          showToast('⚡ Phát hiện trận: ' + (data.map?.name || 'Valorant'));
+          return;
+        }
+      } catch (e) {}
     }
+    showToast('Chưa phát hiện trận. Prodaily sẽ tự động báo khi bạn vào trận trên PC!');
   }
 
   async function updateInstalockConfig() {
-    const autoUnrated = document.getElementById('cfg-unrated').checked;
-    const autoCompe = document.getElementById('cfg-competitive').checked;
-    const apiHost = getApiHost();
+    const autoUnrated = document.getElementById('cfg-unrated')?.checked;
+    const autoCompe = document.getElementById('cfg-competitive')?.checked;
     try {
-      await fetch(apiHost + '/api/pregame/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          autoLockUnrated: autoUnrated,
-          autoLockCompetitive: autoCompe,
-          priorityAgent: currentActiveAgent.displayName,
-          priorityAgentId: currentActiveAgent.uuid
-        })
-      });
-      showToast('Đã lưu cấu hình tự động khóa!');
+      localStorage.setItem('prodaily_autolock_unrated', autoUnrated ? 'true' : 'false');
+      localStorage.setItem('prodaily_autolock_compe', autoCompe ? 'true' : 'false');
     } catch (e) {}
+    showToast('Đã lưu cấu hình tự động khóa!');
   }
 
   async function fetchPregameStatus() {
-    const apiHost = getApiHost();
-    try {
-      const res = await fetch(apiHost + '/api/pregame/status');
-      const json = await res.json();
-      if (json.success && json.data) {
-        renderPregameLobby(json.data);
-      }
-    } catch (e) {
-      console.warn('Pregame status error:', e.message);
+    if (isClientDemoActive) {
+      renderPregameLobby(getClientDemoLobby());
+      return;
+    }
+    let data = null;
+    if (window.ClientRiotEngine && ClientRiotEngine.hasSession()) {
+      try {
+        data = await ClientRiotEngine.getPregameMatch();
+      } catch (e) {}
+    }
+    if (!data || !data.inPregame) {
+      const apiHost = getApiHost();
+      try {
+        const res = await fetch(apiHost + '/api/pregame/status');
+        const json = await res.json();
+        if (json.success && json.data) data = json.data;
+      } catch (e) {}
+    }
+    if (data) {
+      renderPregameLobby(data);
+    } else {
+      renderPregameLobby({ inPregame: false });
     }
   }
 
@@ -2096,16 +2281,25 @@
 
     // D. Store Offers & Featured Bundle & Accessory Store (100% Dynamic)
     if (d.store) {
-      // 1. Daily Offers (with official VP icon)
+      // 1. Daily Offers (with official VP icon & wishlist highlight)
       if (d.store.dailyOffers && d.store.dailyOffers.length > 0) {
+        window.__shopDailySkins = d.store.dailyOffers;
         const grid = document.getElementById('daily-skins-grid');
         grid.innerHTML = '';
-        d.store.dailyOffers.forEach(s => {
-          const hasVideo = !!s.video;
+        d.store.dailyOffers.forEach((s, idx) => {
+          const hasVideo = !!(s.video || s.streamedVideo);
+          const isWishlisted = wishlistedSkins.includes(s.name);
+          if (isWishlisted) {
+            sendNativeNotification(
+              '✨ CỬA HÀNG CÓ SKIN BẠN HẸN!',
+              `Skin ${s.name} (${(s.price || 1775).toLocaleString()} VP) đang xuất hiện trong Cửa Hàng hôm nay!`
+            );
+          }
+
           grid.innerHTML += `
-            <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-[#ff4655]/60 transition-all group">
+            <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-[#ff4655]/60 transition-all group ${isWishlisted ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.35)]' : ''}">
               <div class="flex items-center justify-between text-[10px]">
-                <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-amber-300 font-bold">${s.tier || 'Select'}</span>
+                <span class="px-2 py-0.5 rounded-full ${isWishlisted ? 'bg-amber-400 text-black font-black' : 'bg-white/5 border border-white/10 text-amber-300 font-bold'}">${isWishlisted ? '⭐ ĐANG HẸN' : (s.tier || 'Select')}</span>
                 <div class="flex items-center gap-1 font-mono font-bold text-gray-200">
                   <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3.5 h-3.5 object-contain inline-block">
                   <span>${(s.price || 875).toLocaleString()} VP</span>
@@ -2116,7 +2310,7 @@
               </div>
               <div>
                 <div class="text-xs font-bold text-white truncate mb-2">${s.name}</div>
-                <button onclick='openSkinViewer(${JSON.stringify(s).replace(/'/g, "&apos;")})' class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
+                <button onclick="openSkinViewerByIndex('daily', ${idx})" class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
                   <span>${hasVideo ? '▶' : '🔍'}</span> <span>${hasVideo ? i18n[currentLang].viewVideo : i18n[currentLang].viewPhoto}</span>
                 </button>
               </div>
@@ -2279,13 +2473,144 @@
     if (accEl) accEl.textContent = d + 'n ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
   }, 1000);
 
-  // Background Pregame Match Polling (every 3s)
-  pregamePollInterval = setInterval(() => {
-    const agentTab = document.getElementById('tab-agent');
-    if (agentTab && !agentTab.classList.contains('hidden')) {
-      fetchPregameStatus();
+  // ==========================================
+  // REAL ANDROID LOCAL NOTIFICATIONS & LIVE MATCH ALERT
+  // ==========================================
+  async function requestNotificationPermission() {
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+        const perm = await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+        return perm.display === 'granted';
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  async function sendNativeNotification(title, body, id = Math.floor(Math.random() * 100000)) {
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+        await window.Capacitor.Plugins.LocalNotifications.schedule({
+          notifications: [
+            {
+              title: title,
+              body: body,
+              id: id,
+              schedule: { at: new Date(Date.now() + 300) }
+            }
+          ]
+        });
+        return true;
+      }
+    } catch (e) {
+      console.warn('Notification error:', e.message);
     }
-  }, 3000);
+    return false;
+  }
+
+  async function testNotificationBanner() {
+    await requestNotificationPermission();
+    await sendNativeNotification(
+      '🔔 Prodaily: Thông Báo Hoạt Động Rất Tốt!',
+      'Bạn sẽ nhận được thông báo ngay khi skin yêu thích xuất hiện trong Shop hoặc khi tài khoản vào trận đấu Valorant!'
+    );
+    showToast('Đã gửi thông báo thử nghiệm lên điện thoại!');
+  }
+
+  let activePregameMatchId = null;
+
+  function dismissMatchModal() {
+    document.getElementById('live-match-modal').classList.add('hidden');
+  }
+
+  function openPregameTabFromModal() {
+    dismissMatchModal();
+    switchTab('agent');
+  }
+
+  async function checkLivePregameMatch() {
+    if (!isAuthenticated) return;
+
+    let data = null;
+    if (window.ClientRiotEngine && ClientRiotEngine.hasSession()) {
+      try {
+        data = await ClientRiotEngine.getPregameMatch();
+      } catch (e) {}
+    }
+    if (!data || !data.inPregame) {
+      const apiHost = getApiHost();
+      try {
+        const res = await fetch(apiHost + '/api/pregame/status');
+        const json = await res.json();
+        if (json.success && json.data) data = json.data;
+      } catch (e) {}
+    }
+
+    if (data && data.inPregame && data.matchId) {
+      pregameMatchId = data.matchId;
+      renderPregameLobby(data);
+
+      if (activePregameMatchId !== data.matchId) {
+        activePregameMatchId = data.matchId;
+
+        // Vibrate phone
+        try {
+          if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+            window.Capacitor.Plugins.Haptics.vibrate({ duration: 800 });
+          }
+        } catch (e) {}
+
+        const mapName = data.map?.name || 'Valorant';
+        const queueName = data.queueName || 'Trận đấu mới';
+
+        // 1. Send Real Push Notification
+        sendNativeNotification(
+          '🎮 ĐÃ VÀO TRẬN ĐẤU VALORANT!',
+          `Bản đồ: ${mapName} (${queueName}). Đang mở phòng chờ chọn tướng!`
+        );
+
+        // 2. Show Live Match Modal
+        document.getElementById('match-modal-map').textContent = mapName.toUpperCase();
+        document.getElementById('match-modal-queue').textContent = queueName.toUpperCase();
+        if (data.map?.splash) {
+          document.getElementById('match-modal-bg').src = data.map.splash;
+        }
+        document.getElementById('live-match-modal').classList.remove('hidden');
+
+        // 3. Auto-Lock check (only in pregame, not coregame)
+        if (!data.isCoregame) {
+          const autoUnrated = document.getElementById('cfg-unrated')?.checked ?? (localStorage.getItem('prodaily_autolock_unrated') !== 'false');
+          const autoCompe = document.getElementById('cfg-competitive')?.checked ?? (localStorage.getItem('prodaily_autolock_compe') !== 'false');
+          const isCompe = data.queueId === 'competitive';
+          const isUnrated = data.queueId === 'unrated';
+
+          if ((isCompe && autoCompe) || (isUnrated && autoUnrated) || (data.isSupportedMode && (autoUnrated || autoCompe))) {
+            if (currentActiveAgent && currentActiveAgent.uuid) {
+              setTimeout(async () => {
+                try {
+                  if (window.ClientRiotEngine) {
+                    await ClientRiotEngine.lockAgent(data.matchId, currentActiveAgent.uuid);
+                    showToast('⚡ TỰ ĐỘNG KHÓA THÀNH CÔNG: ' + currentActiveAgent.displayName);
+                    sendNativeNotification(
+                      '⚡ ĐÃ TỰ ĐỘNG KHÓA TƯỚNG!',
+                      `Đã khóa thành công ${currentActiveAgent.displayName} trên map ${mapName}!`
+                    );
+                  }
+                } catch (err) {
+                  console.warn('Auto-lock error:', err.message);
+                }
+              }, 600);
+            }
+          }
+        }
+      }
+    } else {
+      activePregameMatchId = null;
+      dismissMatchModal();
+    }
+  }
+
+  // Live Match Polling in background every 3.5 seconds
+  setInterval(checkLivePregameMatch, 3500);
 
   // Init
   const hostInput = document.getElementById('settings-server-host');

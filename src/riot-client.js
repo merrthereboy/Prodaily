@@ -20,6 +20,8 @@ class ClientRiotEngineClass {
     this.sprayCache = new Map();
     this.bundleCache = new Map();
     this.tierCache = new Map();
+    this.agentCache = new Map();
+    this.mapCache = new Map();
     this.agentsList = [];
     this.mapsList = [];
     this.isMetaLoaded = false;
@@ -169,12 +171,13 @@ class ClientRiotEngineClass {
         }
       } catch (e) {}
 
-      // 2. Skins & Tiers
-      const [skinsRes, tiersRes, bundlesRes, agentsRes, cardsRes, buddiesRes, spraysRes] = await Promise.all([
+      // 2. Skins & Tiers & Agents & Maps
+      const [skinsRes, tiersRes, bundlesRes, agentsRes, mapsRes, cardsRes, buddiesRes, spraysRes] = await Promise.all([
         fetch('https://valorant-api.com/v1/weapons/skins').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/contenttiers').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/bundles').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/agents?isPlayableCharacter=true').then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('https://valorant-api.com/v1/maps').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/playercards').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/buddies').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/sprays').then(r => r.json()).catch(() => ({ data: [] }))
@@ -189,15 +192,39 @@ class ClientRiotEngineClass {
         const displayIcon = s.displayIcon || (s.levels?.[0]?.displayIcon) || 'https://media.valorant-api.com/weaponskins/d8d5d7a1-4d81-8560-54bc-0692ab40f69b/displayicon.png';
         const streamedVideo = s.levels?.find(l => l.streamedVideo)?.streamedVideo || null;
 
+        // Ensure levels have both video & streamedVideo
+        const cleanLevels = (s.levels || []).map((lv, idx) => ({
+          uuid: lv.uuid,
+          displayName: lv.displayName || `${s.displayName} Level ${idx + 1}`,
+          displayIcon: lv.displayIcon || displayIcon,
+          video: lv.streamedVideo || null,
+          streamedVideo: lv.streamedVideo || null
+        }));
+
+        const cleanChromas = (s.chromas || []).map((chr, idx) => ({
+          uuid: chr.uuid,
+          displayName: chr.displayName || `${s.displayName} Chroma ${idx + 1}`,
+          displayIcon: chr.fullRender || chr.displayIcon || displayIcon,
+          fullRender: chr.fullRender || chr.displayIcon || displayIcon,
+          video: chr.streamedVideo || null,
+          streamedVideo: chr.streamedVideo || null
+        }));
+
         const info = {
           uuid: s.uuid,
           displayName: s.displayName,
+          name: s.displayName,
           displayIcon,
+          icon: displayIcon,
           streamedVideo,
+          video: streamedVideo,
           tierName,
-          levels: s.levels || [],
-          chromas: s.chromas || []
+          tier: tierName,
+          price: ClientRiotEngineClass.estimatePrice(tierName),
+          levels: cleanLevels,
+          chromas: cleanChromas
         };
+
         this.skinCache.set(s.uuid, info);
         (s.levels || []).forEach(l => this.skinCache.set(l.uuid, info));
         (s.chromas || []).forEach(c => this.skinCache.set(c.uuid, info));
@@ -220,15 +247,34 @@ class ClientRiotEngineClass {
         this.sprayCache.set(s.uuid, s);
       });
 
-      this.agentsList = (agentsRes.data || []).map(a => ({
-        uuid: a.uuid,
-        displayName: a.displayName,
-        displayIcon: a.displayIcon,
-        displayIconSmall: a.displayIconSmall,
-        fullPortrait: a.fullPortrait,
-        role: a.role ? { displayName: a.role.displayName, displayIcon: a.role.displayIcon } : null,
-        description: a.description
-      }));
+      this.agentsList = (agentsRes.data || []).map(a => {
+        const agentObj = {
+          uuid: a.uuid,
+          displayName: a.displayName,
+          displayIcon: a.displayIcon,
+          displayIconSmall: a.displayIconSmall,
+          fullPortrait: a.fullPortrait,
+          role: a.role ? { displayName: a.role.displayName, displayIcon: a.role.displayIcon } : null,
+          description: a.description
+        };
+        this.agentCache.set(a.uuid, agentObj);
+        this.agentCache.set(a.uuid.toLowerCase(), agentObj);
+        return agentObj;
+      });
+
+      this.mapsList = (mapsRes.data || []).map(m => {
+        const mapObj = {
+          uuid: m.uuid,
+          displayName: m.displayName,
+          splash: m.splash,
+          displayIcon: m.displayIcon,
+          mapUrl: m.mapUrl
+        };
+        this.mapCache.set(m.uuid, mapObj);
+        this.mapCache.set(m.displayName.toLowerCase(), mapObj);
+        if (m.mapUrl) this.mapCache.set(m.mapUrl.toLowerCase(), mapObj);
+        return mapObj;
+      });
 
       this.isMetaLoaded = true;
     } catch (e) {
@@ -413,15 +459,39 @@ class ClientRiotEngineClass {
 
       dailyOffers = rawOffers.map(uuid => {
         const skin = this.skinCache.get(uuid);
+        const name = skin?.displayName || 'Vũ khí Valorant';
+        const tierName = skin?.tierName || 'Premium';
+        const price = ClientRiotEngineClass.estimatePrice(tierName);
+        const rawLevels = skin?.levels || [];
+        const levels = rawLevels.map((lv, idx) => ({
+          uuid: lv.uuid,
+          name: lv.displayName || `${name} Level ${idx + 1}`,
+          displayName: lv.displayName || `${name} Level ${idx + 1}`,
+          displayIcon: lv.displayIcon || skin?.displayIcon,
+          video: lv.streamedVideo || lv.video || null,
+          streamedVideo: lv.streamedVideo || lv.video || null
+        }));
+        const lastVideo = [...levels].reverse().find(l => l.streamedVideo)?.streamedVideo || skin?.streamedVideo || null;
+
         return {
           id: uuid,
-          name: skin?.displayName || 'Vũ khí Valorant',
+          uuid: uuid,
+          name: name,
+          displayName: name,
           icon: skin?.displayIcon || 'https://media.valorant-api.com/weaponskins/d8d5d7a1-4d81-8560-54bc-0692ab40f69b/displayicon.png',
-          video: skin?.streamedVideo || null,
-          tier: skin?.tierName || 'Premium',
-          price: ClientRiotEngineClass.estimatePrice(skin?.tierName),
-          levels: skin?.levels || [],
-          chromas: skin?.chromas || []
+          displayIcon: skin?.displayIcon || 'https://media.valorant-api.com/weaponskins/d8d5d7a1-4d81-8560-54bc-0692ab40f69b/displayicon.png',
+          video: lastVideo,
+          streamedVideo: lastVideo,
+          tier: tierName,
+          tierName: tierName,
+          price: price,
+          levels: levels,
+          chromas: (skin?.chromas || []).map(c => ({
+            ...c,
+            video: c.streamedVideo || c.video || null,
+            streamedVideo: c.streamedVideo || c.video || null,
+            displayIcon: c.fullRender || c.displayIcon || skin?.displayIcon
+          }))
         };
       });
 
@@ -447,7 +517,7 @@ class ClientRiotEngineClass {
             icon = s.displayIcon;
             type = 'Skin Vũ Khí';
             video = s.streamedVideo;
-            levels = s.levels || [];
+            levels = (s.levels || []).map(l => ({ ...l, video: l.streamedVideo || l.video, streamedVideo: l.streamedVideo || l.video }));
             chromas = s.chromas || [];
             tier = s.tierName || 'Exclusive';
           } else if (this.buddyCache.has(itemId)) {
@@ -470,9 +540,12 @@ class ClientRiotEngineClass {
           return {
             id: itemId,
             name,
+            displayName: name,
             icon,
+            displayIcon: icon,
             type,
             video,
+            streamedVideo: video,
             tier,
             levels,
             chromas,
@@ -503,16 +576,30 @@ class ClientRiotEngineClass {
           const origPrice = Object.values(offer.Offer.Cost)[0] || 1775;
           const discPrice = Object.values(offer.DiscountCosts)[0] || origPrice;
           const percent = Math.round((1 - discPrice / origPrice) * 100);
+          const rawLevels = skin?.levels || [];
+          const levels = rawLevels.map((lv, idx) => ({
+            uuid: lv.uuid,
+            name: lv.displayName || `${skin?.displayName || 'Vũ khí'} Level ${idx + 1}`,
+            displayName: lv.displayName || `${skin?.displayName || 'Vũ khí'} Level ${idx + 1}`,
+            displayIcon: lv.displayIcon || skin?.displayIcon,
+            video: lv.streamedVideo || lv.video || null,
+            streamedVideo: lv.streamedVideo || lv.video || null
+          }));
+          const lastVideo = [...levels].reverse().find(l => l.streamedVideo)?.streamedVideo || skin?.streamedVideo || null;
+
           return {
             id: offer.Offer.OfferID,
             name: skin?.displayName || 'Vũ khí Chợ Đêm',
+            displayName: skin?.displayName || 'Vũ khí Chợ Đêm',
             icon: skin?.displayIcon,
-            video: skin?.streamedVideo,
+            displayIcon: skin?.displayIcon,
+            video: lastVideo,
+            streamedVideo: lastVideo,
             tier: skin?.tierName || 'Premium',
             originalPrice: origPrice,
             discountPrice: discPrice,
             discountPercent: `-${percent}%`,
-            levels: skin?.levels || [],
+            levels: levels,
             chromas: skin?.chromas || []
           };
         });
@@ -550,6 +637,7 @@ class ClientRiotEngineClass {
           return {
             id: r?.ItemID || o.Offer?.OfferID,
             name,
+            displayName: name,
             icon,
             displayIcon: icon,
             cost,
@@ -599,8 +687,11 @@ class ClientRiotEngineClass {
           skinId: gun.SkinID,
           skinLevelId: gun.SkinLevelID,
           name: skin?.displayName || 'Skin mặc định',
+          displayName: skin?.displayName || 'Skin mặc định',
           icon: skin?.displayIcon || null,
+          displayIcon: skin?.displayIcon || null,
           video: skin?.streamedVideo || null,
+          streamedVideo: skin?.streamedVideo || null,
           tier: skin?.tierName || 'Standard',
           levels: skin?.levels || [],
           chromas: skin?.chromas || []
@@ -888,29 +979,264 @@ class ClientRiotEngineClass {
     return finalData;
   }
 
+  // Live Match Detection (Pregame Lobby)
+  async getPregameMatch() {
+    if (!this.hasSession()) return { inPregame: false, reason: 'Chưa đăng nhập' };
+    const headers = this.getHeaders();
+    const shard = this.session.shard || 'ap';
+    const region = this.session.region || 'ap';
+    const puuid = this.session.puuid;
+
+    const shardsToTry = [shard, region, 'ap', 'na', 'eu', 'kr'].filter((v, i, a) => v && a.indexOf(v) === i);
+
+    for (const sh of shardsToTry) {
+      try {
+        const reg = this.session.region || sh;
+        const playerRes = await fetch(`https://glz-${reg}-1.${sh}.a.pvp.net/pregame/v1/players/${puuid}`, { headers });
+        if (!playerRes.ok) continue;
+        const playerData = await playerRes.json();
+        const matchId = playerData.MatchID;
+        if (!matchId) continue;
+
+        const matchRes = await fetch(`https://glz-${reg}-1.${sh}.a.pvp.net/pregame/v1/matches/${matchId}`, { headers });
+        if (!matchRes.ok) continue;
+        const match = await matchRes.json();
+
+        const mapId = match.MapID;
+        const queueId = match.QueueID || 'unrated';
+        const map = this.mapCache.get(mapId) || this.mapCache.get(mapId?.toLowerCase()) || {
+          displayName: 'Ascent',
+          splash: 'https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/splash.png',
+          displayIcon: 'https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png'
+        };
+
+        const allPlayers = match.AllyTeam?.Players || match.Teams?.[0]?.Players || [];
+        const teamMembers = allPlayers.map((p, idx) => {
+          const isMe = p.Subject === puuid;
+          const agent = p.CharacterID ? (this.agentCache.get(p.CharacterID) || this.agentCache.get(p.CharacterID.toLowerCase())) : null;
+          const isLocked = p.CharacterSelectionState === 'locked';
+          const isSelected = p.CharacterSelectionState === 'selected';
+
+          return {
+            slot: idx + 1,
+            puuid: p.Subject,
+            isMe,
+            displayName: isMe ? 'Bạn (Self)' : `Đồng đội ${idx + 1}`,
+            agentId: p.CharacterID || null,
+            agentName: agent ? agent.displayName : (isLocked || isSelected ? 'Đặc vụ đã chọn' : 'Chưa chọn'),
+            agentIcon: agent ? agent.displayIcon : null,
+            agentRole: agent?.role ? agent.role.displayName : null,
+            state: isLocked ? 'locked' : isSelected ? 'selected' : 'choosing',
+            stateText: isLocked ? 'ĐÃ KHÓA' : isSelected ? 'ĐANG CHỌN' : 'CHƯA CHỌN'
+          };
+        });
+
+        const timeRemaining = match.PhaseTimeRemainingNS ? Math.max(0, Math.round(match.PhaseTimeRemainingNS / 1e9)) : 30;
+
+        return {
+          inPregame: true,
+          isCoregame: false,
+          matchId,
+          queueId,
+          isSupportedMode: queueId === 'unrated' || queueId === 'competitive',
+          queueName: queueId === 'competitive' ? 'Xếp Hạng (Competitive)' : queueId === 'unrated' ? 'Đấu Thường (Unrated)' : queueId.toUpperCase(),
+          map: {
+            id: mapId,
+            name: map.displayName,
+            splash: map.splash,
+            icon: map.displayIcon
+          },
+          team: teamMembers,
+          phaseTimeRemaining: timeRemaining,
+          lockedCount: teamMembers.filter(m => m.state === 'locked').length,
+          totalCount: teamMembers.length
+        };
+      } catch (err) {}
+    }
+
+    // 2. Check Core-game (Live Match In Progress)
+    for (const sh of shardsToTry) {
+      try {
+        const reg = this.session.region || sh;
+        const playerRes = await fetch(`https://glz-${reg}-1.${sh}.a.pvp.net/core-game/v1/players/${puuid}`, { headers });
+        if (!playerRes.ok) continue;
+        const playerData = await playerRes.json();
+        const matchId = playerData.MatchID;
+        if (!matchId) continue;
+
+        const matchRes = await fetch(`https://glz-${reg}-1.${sh}.a.pvp.net/core-game/v1/matches/${matchId}`, { headers });
+        if (!matchRes.ok) continue;
+        const match = await matchRes.json();
+
+        const mapId = match.MapID;
+        const queueId = match.MatchmakingData?.QueueID || 'unrated';
+        const map = this.mapCache.get(mapId) || this.mapCache.get(mapId?.toLowerCase()) || {
+          displayName: 'Ascent',
+          splash: 'https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/splash.png',
+          displayIcon: 'https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png'
+        };
+
+        const myPlayer = (match.Players || []).find(p => p.Subject === puuid);
+        const myTeamId = myPlayer ? myPlayer.TeamID : 'Blue';
+        const myTeamPlayers = (match.Players || []).filter(p => p.TeamID === myTeamId);
+
+        const teamMembers = myTeamPlayers.map((p, idx) => {
+          const isMe = p.Subject === puuid;
+          const agent = p.CharacterID ? (this.agentCache.get(p.CharacterID) || this.agentCache.get(p.CharacterID.toLowerCase())) : null;
+          return {
+            slot: idx + 1,
+            puuid: p.Subject,
+            isMe,
+            displayName: isMe ? 'Bạn (Self)' : `Đồng đội ${idx + 1}`,
+            agentId: p.CharacterID || null,
+            agentName: agent ? agent.displayName : 'Đặc vụ',
+            agentIcon: agent ? agent.displayIcon : null,
+            agentRole: agent?.role ? agent.role.displayName : null,
+            state: 'locked',
+            stateText: 'TRONG TRẬN'
+          };
+        });
+
+        return {
+          inPregame: true,
+          isCoregame: true,
+          matchId,
+          queueId,
+          isSupportedMode: false,
+          queueName: 'ĐANG THI ĐẤU (LIVE IN-GAME)',
+          map: {
+            id: mapId,
+            name: map.displayName,
+            splash: map.splash,
+            icon: map.displayIcon
+          },
+          team: teamMembers,
+          phaseTimeRemaining: 0,
+          lockedCount: teamMembers.length,
+          totalCount: teamMembers.length
+        };
+      } catch (err) {}
+    }
+
+    return { inPregame: false };
+  }
+
+  // Lock an Agent in Pregame Match (Hard Instalock)
+  async lockAgent(matchId, agentId) {
+    if (!this.hasSession() || !matchId || !agentId) {
+      throw new Error('Thiếu thông tin phòng hoặc đặc vụ để khóa');
+    }
+    const headers = this.getHeaders();
+    const shard = this.session.shard || 'ap';
+    const region = this.session.region || shard;
+    const res = await fetch(`https://glz-${region}-1.${shard}.a.pvp.net/pregame/v1/matches/${matchId}/lock/${agentId}`, {
+      method: 'POST',
+      headers,
+      body: '{}'
+    });
+    if (!res.ok) {
+      throw new Error('Lỗi khóa tướng Riot (HTTP ' + res.status + ')');
+    }
+    return await res.json();
+  }
+
+  // Hover an Agent in Pregame Match
+  async selectAgent(matchId, agentId) {
+    if (!this.hasSession() || !matchId || !agentId) throw new Error('Thiếu thông tin');
+    const headers = this.getHeaders();
+    const shard = this.session.shard || 'ap';
+    const region = this.session.region || shard;
+    const res = await fetch(`https://glz-${region}-1.${shard}.a.pvp.net/pregame/v1/matches/${matchId}/select/${agentId}`, {
+      method: 'POST',
+      headers,
+      body: '{}'
+    });
+    if (!res.ok) throw new Error('Lỗi chọn tướng Riot (HTTP ' + res.status + ')');
+    return await res.json();
+  }
+
+  // Smart Search Skins with Diacritics Support & Normalized Output
   searchSkins(query, weapon, tier, limit = 80) {
     let list = Array.from(this.skinCache.values());
-    // Deduplicate by displayName
     const seen = new Set();
     list = list.filter(s => {
-      if (!s.displayName || s.displayName.includes('Standard') || s.displayName.includes('Chuẩn') || seen.has(s.displayName)) return false;
-      seen.add(s.displayName);
+      const name = s.displayName || s.name || '';
+      if (!name || name.includes('Standard') || name.includes('Chuẩn') || seen.has(name)) return false;
+      seen.add(name);
       return true;
     });
 
+    const stripVietnamese = (str) => {
+      return (str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .toLowerCase();
+    };
+
     if (query) {
-      const q = query.toLowerCase();
-      list = list.filter(s => s.displayName.toLowerCase().includes(q));
+      const q = query.toLowerCase().trim();
+      const qClean = stripVietnamese(q);
+      list = list.filter(s => {
+        const nameLower = (s.displayName || '').toLowerCase();
+        const nameClean = stripVietnamese(s.displayName);
+        return nameLower.includes(q) || nameClean.includes(qClean);
+      });
+      list.sort((a, b) => {
+        const aClean = stripVietnamese(a.displayName);
+        const bClean = stripVietnamese(b.displayName);
+        const aStart = aClean.startsWith(qClean) ? 1 : 0;
+        const bStart = bClean.startsWith(qClean) ? 1 : 0;
+        return bStart - aStart;
+      });
     }
+
     if (weapon) {
-      const w = weapon.toLowerCase();
-      list = list.filter(s => s.displayName.toLowerCase().includes(w));
+      const wClean = stripVietnamese(weapon);
+      list = list.filter(s => stripVietnamese(s.displayName).includes(wClean));
     }
     if (tier) {
       const t = tier.toLowerCase();
       list = list.filter(s => (s.tierName || '').toLowerCase().includes(t));
     }
-    return list.slice(0, limit);
+
+    return list.slice(0, limit).map(s => {
+      const name = s.displayName;
+      const tierName = s.tierName || 'Select';
+      const price = ClientRiotEngineClass.estimatePrice(tierName);
+      const rawLevels = s.levels || [];
+      const levels = rawLevels.map((lv, idx) => ({
+        uuid: lv.uuid,
+        name: lv.displayName || `${name} Level ${idx + 1}`,
+        displayName: lv.displayName || `${name} Level ${idx + 1}`,
+        displayIcon: lv.displayIcon || s.displayIcon,
+        video: lv.streamedVideo || lv.video || null,
+        streamedVideo: lv.streamedVideo || lv.video || null
+      }));
+      const lastVideo = [...levels].reverse().find(l => l.streamedVideo)?.streamedVideo || s.streamedVideo || null;
+
+      return {
+        id: s.uuid,
+        uuid: s.uuid,
+        name: name,
+        displayName: name,
+        icon: s.displayIcon,
+        displayIcon: s.displayIcon,
+        video: lastVideo,
+        streamedVideo: lastVideo,
+        tier: tierName,
+        tierName: tierName,
+        price: price,
+        levels: levels,
+        chromas: (s.chromas || []).map(c => ({
+          ...c,
+          video: c.streamedVideo || c.video || null,
+          streamedVideo: c.streamedVideo || c.video || null,
+          displayIcon: c.fullRender || c.displayIcon || s.displayIcon
+        }))
+      };
+    });
   }
 }
 
