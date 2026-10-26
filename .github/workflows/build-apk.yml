@@ -18,8 +18,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      - name: 📦 Install npm dependencies
+      - name: 📦 Install dependencies
         run: npm install
 
       - name: ☕ Setup Java JDK 17
@@ -27,9 +28,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      - name: 📱 Setup Android SDK
-        uses: android-actions/setup-android@v3
+          cache: 'gradle'
 
       - name: 🔄 Sync Capacitor Web Assets
         run: npx cap sync android
@@ -38,7 +37,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: 🚀 Upload APK Artifact
         uses: actions/upload-artifact@v4
