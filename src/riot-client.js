@@ -22,6 +22,8 @@ class ClientRiotEngineClass {
     this.tierCache = new Map();
     this.agentCache = new Map();
     this.mapCache = new Map();
+    this.bpSkinToContract = new Map();
+    this.agentSkinSet = new Set();
     this.agentsList = [];
     this.mapsList = [];
     this.isMetaLoaded = false;
@@ -171,9 +173,11 @@ class ClientRiotEngineClass {
         }
       } catch (e) {}
 
-      // 2. Skins & Tiers & Agents & Maps
-      const [skinsRes, tiersRes, bundlesRes, agentsRes, mapsRes, cardsRes, buddiesRes, spraysRes] = await Promise.all([
-        fetch('https://valorant-api.com/v1/weapons/skins').then(r => r.json()).catch(() => ({ data: [] })),
+      // 2. Skins & Tiers & Agents & Maps & Contracts (Bilingual VI & EN)
+      const [skinsRes, skinsEnRes, contractsRes, tiersRes, bundlesRes, agentsRes, mapsRes, cardsRes, buddiesRes, spraysRes] = await Promise.all([
+        fetch('https://valorant-api.com/v1/weapons/skins?language=vi-VN').then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('https://valorant-api.com/v1/weapons/skins?language=en-US').then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('https://valorant-api.com/v1/contracts').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/contenttiers').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/bundles').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/agents?isPlayableCharacter=true').then(r => r.json()).catch(() => ({ data: [] })),
@@ -187,15 +191,61 @@ class ClientRiotEngineClass {
         this.tierCache.set(t.uuid, t.devName || t.displayName);
       });
 
+      // Build English Names Map
+      const enNamesMap = new Map();
+      (skinsEnRes.data || []).forEach(s => {
+        enNamesMap.set(s.uuid, s.displayName);
+        (s.levels || []).forEach(l => enNamesMap.set(l.uuid, l.displayName || s.displayName));
+        (s.chromas || []).forEach(c => enNamesMap.set(c.uuid, c.displayName || s.displayName));
+      });
+
+      // Build BP & Agent contracts lookup
+      this.bpSkinToContract.clear();
+      this.agentSkinSet.clear();
+      (contractsRes.data || []).forEach(c => {
+        const type = c.content?.relationType;
+        if (type === 'Season') {
+          const contractInfo = { contractId: c.uuid, contractName: c.displayName };
+          (c.content?.chapters || []).forEach(ch => {
+            (ch.levels || []).forEach(lv => {
+              if (lv.reward?.type === 'EquippableSkinLevel') {
+                this.bpSkinToContract.set(lv.reward.uuid, contractInfo);
+              }
+            });
+          });
+        } else if (type === 'Agent') {
+          (c.content?.chapters || []).forEach(ch => {
+            (ch.levels || []).forEach(lv => {
+              if (lv.reward?.type === 'EquippableSkinLevel') {
+                this.agentSkinSet.add(lv.reward.uuid);
+              }
+            });
+          });
+        }
+      });
+
       (skinsRes.data || []).forEach(s => {
         const tierName = this.tierCache.get(s.contentTierUuid) || 'Select';
         const displayIcon = s.displayIcon || (s.levels?.[0]?.displayIcon) || 'https://media.valorant-api.com/weaponskins/d8d5d7a1-4d81-8560-54bc-0692ab40f69b/displayicon.png';
         const streamedVideo = s.levels?.find(l => l.streamedVideo)?.streamedVideo || null;
+        const displayNameVi = s.displayName || 'Vũ khí Valorant';
+        const displayNameEn = enNamesMap.get(s.uuid) || displayNameVi;
+
+        // Map BP and Agent contracts to skin UUID as well
+        (s.levels || []).forEach(l => {
+          if (this.bpSkinToContract.has(l.uuid) && !this.bpSkinToContract.has(s.uuid)) {
+            this.bpSkinToContract.set(s.uuid, this.bpSkinToContract.get(l.uuid));
+          }
+          if (this.agentSkinSet.has(l.uuid)) {
+            this.agentSkinSet.add(s.uuid);
+          }
+        });
 
         // Ensure levels have both video & streamedVideo
         const cleanLevels = (s.levels || []).map((lv, idx) => ({
           uuid: lv.uuid,
-          displayName: lv.displayName || `${s.displayName} Level ${idx + 1}`,
+          displayName: lv.displayName || `${displayNameVi} Level ${idx + 1}`,
+          displayNameEn: enNamesMap.get(lv.uuid) || lv.displayName || `${displayNameEn} Level ${idx + 1}`,
           displayIcon: lv.displayIcon || displayIcon,
           video: lv.streamedVideo || null,
           streamedVideo: lv.streamedVideo || null
@@ -203,24 +253,33 @@ class ClientRiotEngineClass {
 
         const cleanChromas = (s.chromas || []).map((chr, idx) => ({
           uuid: chr.uuid,
-          displayName: chr.displayName || `${s.displayName} Chroma ${idx + 1}`,
+          displayName: chr.displayName || `${displayNameVi} Chroma ${idx + 1}`,
+          displayNameEn: enNamesMap.get(chr.uuid) || chr.displayName || `${displayNameEn} Chroma ${idx + 1}`,
           displayIcon: chr.fullRender || chr.displayIcon || displayIcon,
           fullRender: chr.fullRender || chr.displayIcon || displayIcon,
           video: chr.streamedVideo || null,
           streamedVideo: chr.streamedVideo || null
         }));
 
+        const isDefault = !s.contentTierUuid || 
+                          displayNameVi.includes('Thông Thường') || 
+                          displayNameVi.includes('Standard') || 
+                          displayNameVi.includes('Ngẫu Nhiên');
+
         const info = {
           uuid: s.uuid,
-          displayName: s.displayName,
-          name: s.displayName,
+          displayName: displayNameVi,
+          displayNameEn: displayNameEn,
+          name: displayNameVi,
           displayIcon,
           icon: displayIcon,
           streamedVideo,
           video: streamedVideo,
+          contentTierUuid: s.contentTierUuid,
           tierName,
           tier: tierName,
-          price: ClientRiotEngineClass.estimatePrice(tierName),
+          isDefault,
+          price: isDefault ? 0 : ClientRiotEngineClass.estimatePrice(tierName),
           levels: cleanLevels,
           chromas: cleanChromas
         };
@@ -761,37 +820,88 @@ class ClientRiotEngineClass {
         (entData.Entitlements || []).forEach(ent => {
           const s = this.skinCache.get(ent.ItemID);
           if (s && !dynamicUniqueSkins.has(s.uuid)) {
+            // 1. Skip standard default weapons or favorites (0 VP, free with base game)
+            const isStandardWeapon = s.isDefault || !s.contentTierUuid ||
+              s.displayName.includes('Thông Thường') ||
+              s.displayName.includes('Standard') ||
+              s.displayName.includes('Chuẩn') ||
+              s.displayName.includes('Ngẫu Nhiên') ||
+              s.displayName.includes('Random');
+            if (isStandardWeapon) return;
+
+            const cleanName = s.displayName.split(' Cấp')[0].split(' Level')[0].split(' Cp')[0].trim();
+
+            // 2. Check if free agent contract weapon (0 VP)
+            const isAgent = this.agentSkinSet.has(ent.ItemID) ||
+              this.agentSkinSet.has(s.uuid) ||
+              agentGuns.some(g => s.displayName.includes(g) || (s.displayNameEn && s.displayNameEn.includes(g)));
+            if (isAgent) {
+              const freeEntry = {
+                uuid: s.uuid,
+                name: cleanName,
+                fullName: s.displayName,
+                tier: s.tierName || 'Select',
+                icon: s.displayIcon,
+                price: 0,
+                reason: 'Nhiệm vụ Đặc Vụ (0 VP)'
+              };
+              freeAgentGuns.push(freeEntry);
+              dynamicUniqueSkins.set(s.uuid, freeEntry);
+              return;
+            }
+
+            // 3. Check if Battle Pass weapon (1000 VP per Act)
+            const bpContract = this.bpSkinToContract.get(ent.ItemID) || this.bpSkinToContract.get(s.uuid);
+            const matchedBpTheme = bpContract ? bpContract.contractName : bpThemes.find(t => (s.displayNameEn || s.displayName).includes(t));
+            if (bpContract || matchedBpTheme) {
+              const passKey = bpContract ? bpContract.contractId : matchedBpTheme;
+              paidBpActs.add(passKey);
+              const bpEntry = {
+                uuid: s.uuid,
+                name: cleanName,
+                fullName: s.displayName,
+                tier: s.tierName || 'Select',
+                icon: s.displayIcon,
+                price: 0,
+                contractName: bpContract?.contractName || matchedBpTheme
+              };
+              paidBpSkins.push(bpEntry);
+              dynamicUniqueSkins.set(s.uuid, bpEntry);
+              return;
+            }
+
+            // 4. Retail Store Skin (Ultra, Exclusive, Premium, Deluxe, Select)
             const tierName = s.tierName || 'Select';
             const tierLower = tierName.toLowerCase();
             if (dynamicTiers[tierLower] !== undefined) dynamicTiers[tierLower]++;
 
-            const cleanName = s.displayName.split(' Cấp')[0].split(' Level')[0].split(' Cp')[0].trim();
-            const retailPrice = ClientRiotEngineClass.estimatePrice(tierName);
+            let retailPrice = ClientRiotEngineClass.estimatePrice(tierName);
+
+            const isMelee = cleanName.includes('Dao') || cleanName.includes('Fury') || cleanName.includes('Găm') || 
+                            cleanName.includes('Rìu') || cleanName.includes('Lưỡi') || cleanName.includes('Cận Chiến') || 
+                            cleanName.includes('Karambit') || cleanName.includes('Sword') || cleanName.includes('Blade') || 
+                            cleanName.includes('Dagger') || cleanName.includes('Scythe') || cleanName.includes('Kunai') || 
+                            (s.displayNameEn && (s.displayNameEn.includes('Melee') || s.displayNameEn.includes('Knife') || s.displayNameEn.includes('Sword') || s.displayNameEn.includes('Karambit') || s.displayNameEn.includes('Blade')));
+
+            if (isMelee) {
+              if (tierLower.includes('ultra')) retailPrice = 4950;
+              else if (tierLower.includes('exclusive')) retailPrice = 4350;
+              else if (tierLower.includes('premium')) retailPrice = 3550;
+              else if (tierLower.includes('deluxe')) retailPrice = 2550;
+              else retailPrice = 1750;
+            }
+
             catalogVp += retailPrice;
-
-            const isAgent = agentGuns.some(g => cleanName.includes(g));
-            const matchedBpTheme = bpThemes.find(t => cleanName.includes(t));
-
             const skinEntry = {
               uuid: s.uuid,
               name: cleanName,
               fullName: s.displayName,
               tier: tierName,
               icon: s.displayIcon,
-              retailPrice
+              retailPrice,
+              price: retailPrice
             };
-
-            if (isAgent) {
-              freeAgentGuns.push({ ...skinEntry, price: 0, reason: 'Nhiệm vụ Đặc Vụ (0 VP)' });
-            } else if (matchedBpTheme) {
-              paidBpSkins.push(skinEntry);
-              paidBpActs.add(matchedBpTheme);
-            } else {
-              let price = retailPrice;
-              const isMelee = cleanName.includes('Dao') || cleanName.includes('Fury') || cleanName.includes('Găm') || cleanName.includes('Rìu') || cleanName.includes('Lưỡi');
-              if (isMelee) price = cleanName.includes('Fury') ? 3550 : (tierName === 'Exclusive' ? 4350 : 3550);
-              storePurchases.push({ ...skinEntry, price });
-            }
+            storePurchases.push(skinEntry);
             dynamicUniqueSkins.set(s.uuid, skinEntry);
           }
         });
@@ -816,7 +926,7 @@ class ClientRiotEngineClass {
     let bundleDiscount = (hasXeroVandal && hasXeroGhost && hasXeroKnife) ? 1735 : 0;
 
     const storeVp = Math.max(0, storePurchases.reduce((acc, s) => acc + s.price, 0) - bundleDiscount);
-    const battlePassCount = Math.max(paidBpActs.size, Math.ceil(paidBpSkins.length / 6));
+    const battlePassCount = paidBpActs.size > 0 ? paidBpActs.size : (paidBpSkins.length > 0 ? Math.ceil(paidBpSkins.length / 10) : 0);
     const battlePassVp = battlePassCount * 1000;
     const currentWalletVp = balances.vp || 0;
 
@@ -1155,13 +1265,14 @@ class ClientRiotEngineClass {
     return await res.json();
   }
 
-  // Smart Search Skins with Diacritics Support & Normalized Output
+  // Smart Bilingual Search Skins with Diacritics Support & Normalized Output
   searchSkins(query, weapon, tier, limit = 80) {
     let list = Array.from(this.skinCache.values());
     const seen = new Set();
     list = list.filter(s => {
       const name = s.displayName || s.name || '';
-      if (!name || name.includes('Standard') || name.includes('Chuẩn') || seen.has(name)) return false;
+      if (!name || s.isDefault || !s.contentTierUuid || seen.has(name)) return false;
+      if (name.includes('Thông Thường') || name.includes('Standard') || name.includes('Chuẩn') || name.includes('Ngẫu Nhiên')) return false;
       seen.add(name);
       return true;
     });
@@ -1179,22 +1290,30 @@ class ClientRiotEngineClass {
       const q = query.toLowerCase().trim();
       const qClean = stripVietnamese(q);
       list = list.filter(s => {
-        const nameLower = (s.displayName || '').toLowerCase();
-        const nameClean = stripVietnamese(s.displayName);
-        return nameLower.includes(q) || nameClean.includes(qClean);
+        const viName = (s.displayName || '').toLowerCase();
+        const viClean = stripVietnamese(s.displayName);
+        const enName = (s.displayNameEn || '').toLowerCase();
+        const enClean = stripVietnamese(s.displayNameEn);
+        return viName.includes(q) || viClean.includes(qClean) || enName.includes(q) || enClean.includes(qClean);
       });
       list.sort((a, b) => {
-        const aClean = stripVietnamese(a.displayName);
-        const bClean = stripVietnamese(b.displayName);
-        const aStart = aClean.startsWith(qClean) ? 1 : 0;
-        const bStart = bClean.startsWith(qClean) ? 1 : 0;
+        const aVi = stripVietnamese(a.displayName);
+        const bVi = stripVietnamese(b.displayName);
+        const aEn = stripVietnamese(a.displayNameEn);
+        const bEn = stripVietnamese(b.displayNameEn);
+        const aStart = (aVi.startsWith(qClean) || aEn.startsWith(qClean)) ? 1 : 0;
+        const bStart = (bVi.startsWith(qClean) || bEn.startsWith(qClean)) ? 1 : 0;
         return bStart - aStart;
       });
     }
 
     if (weapon) {
       const wClean = stripVietnamese(weapon);
-      list = list.filter(s => stripVietnamese(s.displayName).includes(wClean));
+      list = list.filter(s => {
+        const viClean = stripVietnamese(s.displayName);
+        const enClean = stripVietnamese(s.displayNameEn);
+        return viClean.includes(wClean) || enClean.includes(wClean);
+      });
     }
     if (tier) {
       const t = tier.toLowerCase();
@@ -1203,6 +1322,7 @@ class ClientRiotEngineClass {
 
     return list.slice(0, limit).map(s => {
       const name = s.displayName;
+      const nameEn = s.displayNameEn || name;
       const tierName = s.tierName || 'Select';
       const price = ClientRiotEngineClass.estimatePrice(tierName);
       const rawLevels = s.levels || [];
@@ -1210,6 +1330,7 @@ class ClientRiotEngineClass {
         uuid: lv.uuid,
         name: lv.displayName || `${name} Level ${idx + 1}`,
         displayName: lv.displayName || `${name} Level ${idx + 1}`,
+        displayNameEn: lv.displayNameEn || `${nameEn} Level ${idx + 1}`,
         displayIcon: lv.displayIcon || s.displayIcon,
         video: lv.streamedVideo || lv.video || null,
         streamedVideo: lv.streamedVideo || lv.video || null
@@ -1221,6 +1342,7 @@ class ClientRiotEngineClass {
         uuid: s.uuid,
         name: name,
         displayName: name,
+        displayNameEn: nameEn,
         icon: s.displayIcon,
         displayIcon: s.displayIcon,
         video: lastVideo,

@@ -44,33 +44,38 @@ jobs:
 
       - name: 📦 Rename APK for Release
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk Prodaily-v1.0.3.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk Prodaily-v1.0.4.apk
 
       - name: 🚀 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Prodaily-v1.0.3.apk
-          path: Prodaily-v1.0.3.apk
+          name: Prodaily-v1.0.4.apk
+          path: Prodaily-v1.0.4.apk
           retention-days: 30
 
       - name: 📢 Auto Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.3
-          name: Prodaily v1.0.3 - 100% Serverless & Standalone Mobile Edition
+          tag_name: v1.0.4
+          name: Prodaily v1.0.4 - Fix Nạp VP, Tra Skin Tiếng Việt & Mượt Mà
           body: |
-            📱 **Prodaily v1.0.3 - Bản dựng Độc Lập 100% (Serverless Mobile Edition)**
+            📱 **Prodaily v1.0.4 - Cập nhật hoàn thiện trải nghiệm Mobile**
 
-            🌟 **Nâng cấp đột phá:**
-            - 🚀 **100% Độc Lập Không Cần Máy Chủ:** Loại bỏ hoàn toàn sự phụ thuộc vào server máy tính/localhost. Ứng dụng chạy trực tiếp trên điện thoại qua mạng 4G/Wifi.
-            - 🔒 **Kết nối trực tiếp Riot Games API:** Xác thực OAuth, tải Cửa Hàng, Kho Đồ, Chợ Đêm, Ví VP/Radianite trực tiếp từ máy chủ Riot và valorant-api.com.
-            - 📋 **Đăng nhập tiện lợi:** Bổ sung nút sao chép link xác thực Riot nhanh chóng để người dùng mở trên bất kỳ trình duyệt nào.
-            - ⚡ **Peek Tướng & Khóa Tướng Live:** Nhận diện trận đấu thời gian thực qua Riot GLZ Gateway, hiển thị bản đồ, đội hình 5 người và hỗ trợ khóa tướng từ xa.
-            - 🔊 **Âm thanh Video 1080p:** Đầy đủ tiếng hoạt ảnh và nút bật/tắt âm thanh tiện lợi.
+            🌟 **Chi tiết bản sửa lỗi & tối ưu:**
+            - 💰 **Sửa triệt để lỗi tính tiền nạp VP / VNĐ:**
+              - Loại bỏ hoàn toàn 18 vũ khí mặc định (Standard skins) vốn bị tính nhầm 18.425 VP (~2.800.000 VNĐ) vào số tiền nạp.
+              - Phân loại chuẩn xác toàn bộ 463 skin Battle Pass từ 40 Season: tính đúng 1.000 VP / Vé Act thay vì nhân lẻ từng skin.
+              - Miễn phí toàn bộ súng nhiệm vụ Đặc Vụ (29 súng đặc vụ, 0 VP).
+              - Bổ sung nút **✏️ Tùy chỉnh tiền nạp** cho phép người dùng xem chi tiết bảng phân loại VP hoặc tự nhập số tiền nạp thực tế.
+            - 🔍 **Hỗ trợ tìm kiếm Skin Tiếng Việt hoàn hảo:**
+              - Tải song ngữ `vi-VN` & `en-US` từ valorant-api. Tra cứu tức thì từ khóa Tiếng Việt có dấu ("lưỡi hái", "kẻ cướp", "chiến hồn", "hoàng hôn") hoặc không dấu ("luoi hai", "ke cuop") lẫn tên tiếng Anh ("scythe", "reaver", "karambit").
+            - 📜 **Sửa lỗi danh sách gợi ý tìm kiếm bị cụt ngủn & không cuộn được:**
+              - Chuyển danh sách gợi ý thành dạng in-flow mượt mà, mở rộng tới 360px với momentum touch scroll (`-webkit-overflow-scrolling: touch`).
+              - Hiển thị cả tên Tiếng Việt và phụ đề tiếng Anh, giá VP, nút ▶ Xem hoạt ảnh và nút ⭐ Hẹn skin trực tiếp.
 
             👤 Tác giả: **merrthereboy**  
             💬 Cộng đồng Discord: https://discord.com/invite/z4jUC4v8W2
-          files: Prodaily-v1.0.3.apk
+          files: Prodaily-v1.0.4.apk
           draft: false
           prerelease: false
         env:

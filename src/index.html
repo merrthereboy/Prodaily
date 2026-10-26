@@ -100,7 +100,7 @@
             <img src="assets/icon-192.png" class="w-6 h-6 rounded-lg object-contain border border-[#ff4655]/50 shadow-md shadow-[#ff4655]/20" alt="Logo">
             <span class="font-mono font-black text-xs tracking-wider text-white">PRO<span class="text-[#ff4655]">DAILY</span></span>
           </div>
-          <span class="text-[10px] text-gray-500 font-mono">v1.0.3</span>
+          <span class="text-[10px] text-gray-500 font-mono">v1.0.4</span>
         </div>
         
         <div class="flex items-center gap-2">
@@ -203,6 +203,9 @@
               <span class="w-2 h-2 rounded-full bg-[#ff4655]"></span>
               <span class="text-[11px] font-black uppercase tracking-wider text-white" data-i18n="mezuValuationTitle">ƯỚC TÍNH SỐ TIỀN ĐÃ NẠP</span>
             </div>
+            <button onclick="openTopupCustomModal()" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white text-[10px] font-bold flex items-center gap-1 border border-white/10 transition-colors">
+              <span>✏️</span> <span>Tùy chỉnh</span>
+            </button>
           </div>
 
           <div class="flex items-baseline justify-between pt-1">
@@ -214,7 +217,10 @@
                   VP
                 </span>
               </div>
-              <div class="text-xs font-mono font-bold text-emerald-400 mt-0.5" id="mezu-vnd">-- VNĐ</div>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-xs font-mono font-bold text-emerald-400" id="mezu-vnd">-- VNĐ</span>
+                <span id="mezu-custom-badge" class="hidden text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">Đã tùy chỉnh</span>
+              </div>
               <!-- Dynamic Breakdown Pill -->
               <div class="text-[9.5px] text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap" id="mezu-breakdown">
                 <span class="text-gray-500">Đang đồng bộ...</span>
@@ -600,16 +606,18 @@
           <p class="text-xs text-gray-400 mb-3" data-i18n="alertDesc">Nhập tên skin bạn muốn hẹn, xem video hoạt ảnh từng cấp và thêm vào danh sách theo dõi:</p>
 
           <!-- Search Input with Live Autocomplete -->
-          <div class="relative">
-            <input type="text" id="alert-skin-input" oninput="handleSkinSearchInput(this.value)" placeholder="Ví dụ: Kuronami, Prime, Reaver, RGX..." class="w-full py-2.5 pl-3 pr-20 bg-black/40 border border-white/10 focus:border-[#ff4655] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none transition-colors">
-            
-            <div class="absolute right-1.5 top-1.5 flex items-center gap-1">
-              <span id="search-spinner" class="hidden w-4 h-4 border-2 border-[#ff4655] border-t-transparent rounded-full animate-spin"></span>
-              <button onclick="addCustomAlertSkin()" class="px-2.5 py-1 bg-[#ff4655] hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-all shadow" data-i18n="addBtn">Thêm</button>
+          <div>
+            <div class="relative">
+              <input type="text" id="alert-skin-input" oninput="handleSkinSearchInput(this.value)" placeholder="Ví dụ: Lưỡi hái, Kuronami, Prime, Reaver, Scythe..." class="w-full py-2.5 pl-3 pr-20 bg-black/40 border border-white/10 focus:border-[#ff4655] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none transition-colors">
+              
+              <div class="absolute right-1.5 top-1.5 flex items-center gap-1">
+                <span id="search-spinner" class="hidden w-4 h-4 border-2 border-[#ff4655] border-t-transparent rounded-full animate-spin"></span>
+                <button onclick="addCustomAlertSkin()" class="px-2.5 py-1 bg-[#ff4655] hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-all shadow" data-i18n="addBtn">Thêm</button>
+              </div>
             </div>
 
-            <!-- Dynamic Autocomplete Suggestions Dropdown -->
-            <div id="skin-search-suggestions" class="hidden absolute left-0 right-0 top-11 bg-[#0b1018] border border-white/15 rounded-xl shadow-2xl p-1.5 z-40 max-h-60 overflow-y-auto space-y-1"></div>
+            <!-- Dynamic Autocomplete Suggestions List (In-flow, smooth touch momentum scroll) -->
+            <div id="skin-search-suggestions" class="hidden mt-2 bg-[#0b1018]/95 border border-white/15 rounded-xl shadow-2xl p-2 z-30 max-h-[360px] overflow-y-auto overscroll-contain space-y-1" style="-webkit-overflow-scrolling: touch; touch-action: pan-y;"></div>
           </div>
 
           <!-- Notification Status & Test Notification Button -->
@@ -867,6 +875,68 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 4: TOP-UP CALIBRATION & VALUATION BREAKDOWN MODAL -->
+  <!-- ======================================================== -->
+  <div id="topup-custom-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 animate-fade-in">
+    <div class="glass-sheet bg-[#090d14] border border-white/15 rounded-3xl w-full max-w-sm p-4 shadow-2xl flex flex-col space-y-3.5">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-2 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Chi Tiết & Tùy Chỉnh Tiền Nạp</h3>
+        </div>
+        <button onclick="closeTopupCustomModal()" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 flex items-center justify-center text-xs font-bold">✕</button>
+      </div>
+
+      <!-- Real Breakdown stats -->
+      <div class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2 text-xs">
+        <div class="text-[11px] font-bold text-gray-300 flex items-center justify-between">
+          <span>Tự động tính từ Riot API:</span>
+          <span class="font-mono text-emerald-400 font-bold" id="topup-modal-auto-vnd">-- VNĐ</span>
+        </div>
+        <div class="space-y-1 text-[11px] text-gray-400 pt-1 border-t border-white/5">
+          <div class="flex justify-between">
+            <span>🛒 Skin mua Cửa Hàng:</span>
+            <span class="font-mono text-white" id="topup-modal-store-vp">-- VP</span>
+          </div>
+          <div class="flex justify-between">
+            <span>🎟️ Battle Pass đã mua:</span>
+            <span class="font-mono text-white" id="topup-modal-bp-vp">-- VP</span>
+          </div>
+          <div class="flex justify-between">
+            <span>💰 Số dư VP còn trong ví:</span>
+            <span class="font-mono text-white" id="topup-modal-wallet-vp">-- VP</span>
+          </div>
+          <div class="flex justify-between text-emerald-400">
+            <span>🎁 Miễn phí (Mặc định + Đặc vụ):</span>
+            <span class="font-mono font-bold" id="topup-modal-free-guns">0 VP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Override Input -->
+      <div class="space-y-1.5">
+        <label class="text-[11px] font-bold text-gray-300 block">Tự nhập số tiền nạp thực tế (VNĐ):</label>
+        <p class="text-[10px] text-gray-400">Nếu bạn đã nạp qua kênh đại lý, ưu đãi hoặc muốn đặt số tiền chính xác:</p>
+        <div class="relative">
+          <input type="number" id="custom-topup-input" placeholder="Ví dụ: 1500000" class="w-full py-2.5 px-3 bg-black/50 border border-white/15 focus:border-emerald-400 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none">
+          <span class="absolute right-3 top-2.5 text-xs text-gray-400 font-bold">VNĐ</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="saveCustomTopupAmount()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow">
+          <span>💾 Lưu Số Tiền</span>
+        </button>
+        <button onclick="resetCustomTopupAmount()" class="py-2.5 px-3 bg-white/10 hover:bg-white/20 text-gray-300 rounded-xl text-xs font-bold transition-all border border-white/10">
+          <span>🔄 Tự Động Tính</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1561,6 +1631,51 @@
   }
 
   // ==========================================
+  // TOP-UP CALIBRATION & VALUATION OVERRIDE
+  // ==========================================
+  function openTopupCustomModal() {
+    const savedCustom = localStorage.getItem('prodaily_custom_topup_vnd');
+    const input = document.getElementById('custom-topup-input');
+    if (savedCustom) input.value = savedCustom;
+    else input.value = '';
+
+    if (currentPlayerData && currentPlayerData.stats && currentPlayerData.stats.mezuValuation) {
+      const m = currentPlayerData.stats.mezuValuation;
+      document.getElementById('topup-modal-auto-vnd').textContent = (m.vnd || 0).toLocaleString('vi-VN') + ' VNĐ';
+      document.getElementById('topup-modal-store-vp').textContent = (m.storeVp || 0).toLocaleString() + ' VP (' + (m.storeSkinsCount || 0) + ' skin)';
+      document.getElementById('topup-modal-bp-vp').textContent = (m.battlePassVp || 0).toLocaleString() + ' VP (' + (m.battlePassCount || 0) + ' BP)';
+      document.getElementById('topup-modal-wallet-vp').textContent = (m.currentWalletVp || 0).toLocaleString() + ' VP';
+      document.getElementById('topup-modal-free-guns').textContent = ((m.freeAgentGunsCount || 0) + 18) + ' súng (0 VP)';
+    }
+
+    document.getElementById('topup-custom-modal').classList.remove('hidden');
+  }
+
+  function closeTopupCustomModal() {
+    document.getElementById('topup-custom-modal').classList.add('hidden');
+  }
+
+  function saveCustomTopupAmount() {
+    const input = document.getElementById('custom-topup-input');
+    const val = parseInt(input.value, 10);
+    if (!isNaN(val) && val >= 0) {
+      localStorage.setItem('prodaily_custom_topup_vnd', val);
+      showToast(currentLang === 'vi' ? 'Đã lưu số tiền nạp: ' + val.toLocaleString('vi-VN') + ' VNĐ' : 'Saved top-up: ' + val.toLocaleString() + ' VND');
+      closeTopupCustomModal();
+      if (currentPlayerData) renderPlayerData(currentPlayerData);
+    } else {
+      showToast(currentLang === 'vi' ? 'Vui lòng nhập số tiền hợp lệ' : 'Please enter a valid amount');
+    }
+  }
+
+  function resetCustomTopupAmount() {
+    localStorage.removeItem('prodaily_custom_topup_vnd');
+    showToast(currentLang === 'vi' ? 'Đã khôi phục tính tiền tự động theo ZaloPay' : 'Reset to auto calculation');
+    closeTopupCustomModal();
+    if (currentPlayerData) renderPlayerData(currentPlayerData);
+  }
+
+  // ==========================================
   // ALERT SKIN LOGIC (SETTINGS TAB)
   // ==========================================
   function handleSkinSearchInput(val) {
@@ -1583,7 +1698,7 @@
           if (ClientRiotEngine.skinCache.size === 0) {
             await ClientRiotEngine.preloadMetadata();
           }
-          const localResults = ClientRiotEngine.searchSkins(q, '', '', 20);
+          const localResults = ClientRiotEngine.searchSkins(q, '', '', 60);
           spin.classList.add('hidden');
           renderSkinSuggestions(localResults);
         } else {
@@ -1592,7 +1707,7 @@
       } catch (e) {
         spin.classList.add('hidden');
       }
-    }, 200);
+    }, 150);
   }
 
   function renderSkinSuggestions(skins) {
@@ -1600,36 +1715,59 @@
     box.innerHTML = '';
     window.__searchSkins = skins || [];
     if (!skins || skins.length === 0) {
-      box.innerHTML = '<div class="p-2 text-xs text-gray-400 text-center">' + (currentLang === 'vi' ? 'Không tìm thấy skin nào' : 'No skins found') + '</div>';
+      box.innerHTML = `
+        <div class="flex items-center justify-between p-2 text-xs text-gray-400">
+          <span>${currentLang === 'vi' ? 'Không tìm thấy skin nào phù hợp' : 'No skins found'}</span>
+          <button onclick="document.getElementById('skin-search-suggestions').classList.add('hidden')" class="text-gray-400 hover:text-white text-xs px-2 py-0.5 rounded bg-white/10">✕ Đóng</button>
+        </div>
+      `;
       box.classList.remove('hidden');
       return;
     }
 
-    skins.slice(0, 15).forEach((s, idx) => {
+    // Header with total count and Close button
+    const header = document.createElement('div');
+    header.className = "flex items-center justify-between pb-1.5 px-2 border-b border-white/10 text-[10px] text-gray-400 font-bold";
+    header.innerHTML = `
+      <span>${currentLang === 'vi' ? `KẾT QUẢ TÌM KIẾM (${skins.length} skin)` : `SEARCH RESULTS (${skins.length} skins)`}</span>
+      <button onclick="document.getElementById('skin-search-suggestions').classList.add('hidden')" class="text-gray-400 hover:text-white px-2 py-0.5 rounded bg-white/10">✕ Đóng</button>
+    `;
+    box.appendChild(header);
+
+    skins.forEach((s, idx) => {
       const name = s.name || s.displayName || 'Skin Valorant';
+      const nameEn = s.displayNameEn && s.displayNameEn !== name ? s.displayNameEn : '';
       const icon = s.icon || s.displayIcon || 'https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png';
       const tier = s.tier || s.tierName || 'Premium';
       const price = s.price || 1775;
       const hasVideo = !!(s.video || s.streamedVideo);
+      const isWishlisted = wishlistedSkins.includes(name);
 
       const row = document.createElement('div');
-      row.className = "flex items-center justify-between p-2 rounded-lg hover:bg-white/10 cursor-pointer transition-colors";
+      row.className = "flex items-center justify-between p-2 rounded-xl hover:bg-white/10 cursor-pointer transition-colors border border-transparent hover:border-white/10";
       row.innerHTML = `
-        <div class="flex items-center gap-2.5 overflow-hidden">
-          <img src="${icon}" class="w-10 h-6 object-contain flex-shrink-0" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'">
+        <div class="flex items-center gap-2.5 overflow-hidden flex-1 mr-2">
+          <img src="${icon}" class="w-12 h-7 object-contain flex-shrink-0 filter drop-shadow" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'">
           <div class="truncate">
-            <div class="text-xs font-bold text-white truncate">${name}</div>
-            <div class="text-[10px] text-amber-400 flex items-center gap-1 font-mono">
-              <span>${tier}</span>
+            <div class="text-xs font-bold text-white truncate flex items-center gap-1.5">
+              <span>${name}</span>
+              ${isWishlisted ? '<span class="text-[9px] px-1 rounded bg-amber-400 text-black font-black">⭐ ĐÃ HẸN</span>' : ''}
+            </div>
+            ${nameEn ? `<div class="text-[10px] text-gray-400 truncate">${nameEn}</div>` : ''}
+            <div class="text-[10px] text-amber-400 flex items-center gap-1 font-mono mt-0.5">
+              <span class="px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-[9px]">${tier}</span>
               <span>•</span>
               <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3 h-3 inline-block">
               <span>${price.toLocaleString()} VP</span>
             </div>
           </div>
         </div>
-        <div class="flex items-center gap-1">
-          <button onclick="event.stopPropagation(); openSkinViewerByIndex('search', ${idx})" class="px-2 py-1 rounded bg-[#ff4655] hover:bg-red-600 text-white text-[10px] font-bold">
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <button onclick="event.stopPropagation(); openSkinViewerByIndex('search', ${idx})" class="px-2 py-1.5 rounded-lg ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} text-[10px] font-bold transition-all shadow">
             ${hasVideo ? '▶ Video' : 'Ảnh'}
+          </button>
+          <button onclick="event.stopPropagation(); toggleWishlistFromSearch('${name.replace(/'/g, "\\'")}')" class="px-2 py-1.5 rounded-lg ${isWishlisted ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10'} text-[10px] font-bold transition-all">
+            ${isWishlisted ? '✓ Đã hẹn' : '+ Hẹn'}
           </button>
         </div>
       `;
@@ -1637,6 +1775,13 @@
       box.appendChild(row);
     });
     box.classList.remove('hidden');
+  }
+
+  function toggleWishlistFromSearch(name) {
+    toggleWishlist(name);
+    if (window.__searchSkins && window.__searchSkins.length > 0) {
+      renderSkinSuggestions(window.__searchSkins);
+    }
   }
 
   function selectSkinFromSearch(skin) {
@@ -2176,14 +2321,24 @@
       if (d.stats.mezuValuation) {
         const m = d.stats.mezuValuation;
         document.getElementById('mezu-vp').textContent = (m.vp || 0).toLocaleString();
-        document.getElementById('mezu-vnd').textContent = m.vndFormatted || ('~' + (m.vnd || 0).toLocaleString('vi-VN') + ' VNĐ');
+
+        const customVnd = localStorage.getItem('prodaily_custom_topup_vnd');
+        const badgeEl = document.getElementById('mezu-custom-badge');
+        if (customVnd !== null && !isNaN(parseInt(customVnd, 10))) {
+          const cVal = parseInt(customVnd, 10);
+          document.getElementById('mezu-vnd').textContent = '~' + cVal.toLocaleString('vi-VN') + ' VNĐ';
+          if (badgeEl) badgeEl.classList.remove('hidden');
+        } else {
+          document.getElementById('mezu-vnd').textContent = m.vndFormatted || ('~' + (m.vnd || 0).toLocaleString('vi-VN') + ' VNĐ');
+          if (badgeEl) badgeEl.classList.add('hidden');
+        }
 
         const bdEl = document.getElementById('mezu-breakdown');
         if (bdEl) {
           const isVi = currentLang === 'vi';
           const storeCount = m.storeSkinsCount || 0;
           const bpCount = m.battlePassCount || 0;
-          const freeCount = (m.freeAgentGunsCount || 0) + (m.freeBpSkinsCount || 0);
+          const freeCount = (m.freeAgentGunsCount || 0) + 18;
           bdEl.innerHTML = `
             <span class="text-gray-300 font-medium">${isVi ? 'Cửa hàng' : 'Store'}: <b class="text-white">${storeCount}</b></span>
             <span>•</span>
