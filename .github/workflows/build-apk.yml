@@ -44,34 +44,33 @@ jobs:
 
       - name: 📦 Rename APK for Release
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk Prodaily-v1.0.2.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk Prodaily-v1.0.3.apk
 
       - name: 🚀 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Prodaily-v1.0.2.apk
-          path: Prodaily-v1.0.2.apk
+          name: Prodaily-v1.0.3.apk
+          path: Prodaily-v1.0.3.apk
           retention-days: 30
 
       - name: 📢 Auto Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.2
-          name: Prodaily v1.0.2 - Audio, Real Push Alerts & Live Match Auto-Lock
+          tag_name: v1.0.3
+          name: Prodaily v1.0.3 - 100% Serverless & Standalone Mobile Edition
           body: |
-            📱 **Prodaily v1.0.2 - Bản cập nhật lớn hoàn thiện tính năng & trải nghiệm người dùng**
+            📱 **Prodaily v1.0.3 - Bản dựng Độc Lập 100% (Serverless Mobile Edition)**
 
-            🌟 **Các sửa đổi & nâng cấp nổi bật:**
-            - 🎨 **Logo & Tên App Chính Thức:** Đổi tên ứng dụng thành **Prodaily** và áp dụng biểu tượng Logo ProDaily đỏ đen cao cấp trên màn hình chính Android.
-            - 🔊 **Âm thanh Video:** Đã mở âm thanh hoạt ảnh skin 1080p, bổ sung nút bật/tắt tiếng (🔊/🔇) tiện lợi và cấp quyền phát âm thanh trực tiếp trên Android WebView.
-            - 🎬 **Sửa lỗi chọn cấp Skin:** Khắc phục triệt để lỗi chọn cấp (Level 1, 2, 3, 4) bị đổi thành ảnh ở trang Shop; chuyển đổi mượt mà và phát đúng video từng cấp.
-            - 🔍 **Tra cứu Skin chuẩn xác:** Tìm kiếm skin tiếng Việt có dấu và không dấu cực nhanh, hiển thị chuẩn xác hình ảnh, phân cấp, giá VP và video.
-            - 🔔 **Thông Báo Đẩy Thật (Real Local Push):** Cấp quyền thông báo Android thật, báo ngay khi skin bạn hẹn xuất hiện trong Cửa hàng hoặc Chợ Đêm (kèm nút thử nghiệm trong Cài Đặt).
-            - ⚡ **Peek Tướng & Khóa Tướng Trực Tiếp (Live Match):** Tự động phát hiện trận đấu theo thời gian thực khi tài khoản online. Khi có trận, app tự rung, gửi thông báo đẩy thật và hiện màn hình Peek Tướng với đầy đủ bản đồ, đội hình 5 người, cho phép chọn/khóa tướng tức thì hoặc tự động instalock theo tướng ưu tiên!
+            🌟 **Nâng cấp đột phá:**
+            - 🚀 **100% Độc Lập Không Cần Máy Chủ:** Loại bỏ hoàn toàn sự phụ thuộc vào server máy tính/localhost. Ứng dụng chạy trực tiếp trên điện thoại qua mạng 4G/Wifi.
+            - 🔒 **Kết nối trực tiếp Riot Games API:** Xác thực OAuth, tải Cửa Hàng, Kho Đồ, Chợ Đêm, Ví VP/Radianite trực tiếp từ máy chủ Riot và valorant-api.com.
+            - 📋 **Đăng nhập tiện lợi:** Bổ sung nút sao chép link xác thực Riot nhanh chóng để người dùng mở trên bất kỳ trình duyệt nào.
+            - ⚡ **Peek Tướng & Khóa Tướng Live:** Nhận diện trận đấu thời gian thực qua Riot GLZ Gateway, hiển thị bản đồ, đội hình 5 người và hỗ trợ khóa tướng từ xa.
+            - 🔊 **Âm thanh Video 1080p:** Đầy đủ tiếng hoạt ảnh và nút bật/tắt âm thanh tiện lợi.
 
             👤 Tác giả: **merrthereboy**  
             💬 Cộng đồng Discord: https://discord.com/invite/z4jUC4v8W2
-          files: Prodaily-v1.0.2.apk
+          files: Prodaily-v1.0.3.apk
           draft: false
           prerelease: false
         env:

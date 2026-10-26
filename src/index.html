@@ -100,7 +100,7 @@
             <img src="assets/icon-192.png" class="w-6 h-6 rounded-lg object-contain border border-[#ff4655]/50 shadow-md shadow-[#ff4655]/20" alt="Logo">
             <span class="font-mono font-black text-xs tracking-wider text-white">PRO<span class="text-[#ff4655]">DAILY</span></span>
           </div>
-          <span class="text-[10px] text-gray-500 font-mono">v1.0.2</span>
+          <span class="text-[10px] text-gray-500 font-mono">v1.0.3</span>
         </div>
         
         <div class="flex items-center gap-2">
@@ -662,14 +662,18 @@
             <span class="text-xs text-gray-400">→</span>
           </button>
 
-          <!-- Server Connection URL (For APK & Remote Access) -->
-          <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
-            <div class="flex items-center justify-between text-[11px] font-bold text-gray-300">
-              <span class="flex items-center gap-1.5"><span>📡</span> <span>Địa Chỉ Máy Chủ (Server URL)</span></span>
-              <button onclick="saveServerHost()" class="text-[9.5px] px-2 py-0.5 rounded-lg bg-[#ff4655] hover:bg-red-600 text-white font-bold transition-all shadow">Lưu</button>
+          <!-- 100% Serverless / Standalone Direct Connection Badge -->
+          <div class="p-3 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-emerald-900/10 to-black/60 border border-emerald-500/30 space-y-2 shadow-lg">
+            <div class="flex items-center justify-between">
+              <span class="flex items-center gap-1.5 text-[11px] font-black text-emerald-400 uppercase tracking-wider">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>CHẾ ĐỘ ĐỘC LẬP (100% SERVERLESS)</span>
+              </span>
+              <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono font-bold">Riot Official API</span>
             </div>
-            <input type="text" id="settings-server-host" placeholder="http://192.168.1.205:3000" class="w-full py-1.5 px-2.5 bg-black/50 border border-white/15 focus:border-[#ff4655] rounded-lg text-xs text-white font-mono focus:outline-none">
-            <span class="text-[9.5px] text-gray-400 block leading-tight">Dùng IP máy tính hoặc domain cloud khi cài file APK trên điện thoại.</span>
+            <p class="text-[10px] text-gray-300 leading-relaxed">
+              Ứng dụng hoạt động <strong>hoàn toàn độc lập trên điện thoại</strong> của bạn. Dữ liệu tài khoản, Cửa hàng, Kho đồ và Peek trận đấu được kết nối trực tiếp đến hệ thống máy chủ <strong>Riot Games</strong> và <strong>valorant-api.com</strong> qua mạng 4G/Wifi của điện thoại, không cần máy tính và không qua bất kỳ server trung gian nào.
+            </p>
           </div>
 
           <!-- Logout Button (Clean Wipe) -->
@@ -840,10 +844,15 @@
       <!-- Step 1: Open Riot Official Login Page with prompt=login -->
       <div class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
         <span class="text-[11px] font-bold text-gray-300 block" data-i18n="step1Title">Bước 1: Mở trang xác thực Riot Games</span>
-        <button onclick="openRiotAuthUrl()" class="w-full py-2.5 px-3 bg-[#ff4655] hover:bg-red-600 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg">
-          <span>🌐</span> <span data-i18n="step1Btn">Mở Trang Đăng Nhập Riot</span>
-        </button>
-        <span class="text-[10px] text-gray-400 block leading-tight" data-i18n="step1Hint">Sau khi đăng nhập, trình duyệt sẽ chuyển hướng sang trang trắng (localhost/redirect) chứa mã xác thực.</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="openRiotAuthUrl()" class="py-2.5 px-3 bg-[#ff4655] hover:bg-red-600 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-lg">
+            <span>🌐</span> <span>Mở Đăng Nhập</span>
+          </button>
+          <button onclick="copyRiotAuthUrl()" class="py-2.5 px-3 bg-white/10 hover:bg-white/20 active:scale-98 text-gray-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border border-white/10">
+            <span>📋</span> <span>Sao Chép Link</span>
+          </button>
+        </div>
+        <span class="text-[10px] text-gray-400 block leading-tight" data-i18n="step1Hint">Sau khi đăng nhập trên trình duyệt, copy toàn bộ link trên thanh địa chỉ (chứa access_token).</span>
       </div>
 
       <!-- Step 2: Paste Redirect URL -->
@@ -898,29 +907,7 @@
   <!-- ======================================================== -->
   <script src="riot-client.js"></script>
   <script>
-  function getApiHost() {
-    const custom = localStorage.getItem('skinpeek_server_host');
-    if (custom) return custom.replace(/\/$/, '');
-    if (window.location.port === '3000') return window.location.origin;
-    if (window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
-      return window.location.origin;
-    }
-    return 'http://192.168.1.205:3000';
-  }
-
-  function saveServerHost() {
-    const input = document.getElementById('settings-server-host');
-    const val = input ? input.value.trim() : '';
-    if (val) {
-      localStorage.setItem('skinpeek_server_host', val);
-      showToast('Đã lưu máy chủ: ' + val);
-    } else {
-      localStorage.removeItem('skinpeek_server_host');
-      showToast('Đã đặt lại máy chủ mặc định');
-    }
-    loadData();
-  }
-
+  // Pure Standalone Riot Engine (Zero Server / 100% Client-Side)
   let currentLang = 'vi';
   let isBalanceHidden = false;
   let currentRiotId = '';
@@ -1184,12 +1171,6 @@
     if (window.ClientRiotEngine) {
       ClientRiotEngine.clearSession();
     }
-    const apiHost = getApiHost();
-    try {
-      await fetch(apiHost + '/api/auth/logout', { method: 'POST' });
-    } catch (e) {
-      console.warn('Logout API error:', e.message);
-    }
     
     // Complete wipe of all client local storage and state
     localStorage.clear();
@@ -1266,26 +1247,30 @@
 
   const RIOT_AUTH_URL = 'https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&client_id=riot-client&response_type=token%20id_token&scope=openid%20link%20ban%20lol_region&nonce=1';
 
-  async function openRiotAuthUrl() {
-    const apiHost = getApiHost();
-    let target = RIOT_AUTH_URL;
+  function openRiotAuthUrl() {
     try {
-      const res = await fetch(apiHost + '/api/auth/login-url');
-      const data = await res.json();
-      if (data && (data.loginUrl || data.url)) {
-        target = data.loginUrl || data.url;
-      }
+      window.open(RIOT_AUTH_URL, '_system');
     } catch (e) {
-      // Use fallback RIOT_AUTH_URL
+      window.open(RIOT_AUTH_URL, '_blank');
     }
-    window.open(target, '_blank');
+  }
+
+  function copyRiotAuthUrl() {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(RIOT_AUTH_URL);
+        showToast('Đã sao chép link xác thực Riot Games!');
+        return;
+      }
+    } catch (e) {}
+    showToast('Link: auth.riotgames.com');
   }
 
   async function pasteFromClipboard() {
     try {
       if (navigator.clipboard && navigator.clipboard.readText) {
         const text = await navigator.clipboard.readText();
-        if (text && (text.includes('access_token') || text.includes('http'))) {
+        if (text && (text.includes('access_token') || text.includes('http') || text.includes('localhost'))) {
           document.getElementById('login-redirect-url-input').value = text;
           showToast('Đã dán link từ bộ nhớ tạm!');
           return;
@@ -1304,11 +1289,10 @@
     }
 
     const btn = document.getElementById('submit-login-btn');
-    btn.textContent = 'Đang xử lý kết nối...';
+    btn.textContent = 'Đang kết nối Riot Games...';
     btn.disabled = true;
 
     try {
-      // 1. Direct Standalone Client-Side Authentication (Native Mobile & Direct)
       if (window.ClientRiotEngine) {
         showToast('Đang kết nối trực tiếp Riot Games...');
         const authRes = await ClientRiotEngine.authenticateWithUrl(url);
@@ -1318,27 +1302,11 @@
         showToast('Đã kết nối thành công: ' + (authRes.riotId || 'Riot Account'));
         closeLoginModal();
         input.value = '';
-        return;
-      }
-
-      // 2. Fallback to Server if ClientRiotEngine is not loaded
-      const apiHost = getApiHost();
-      const res = await fetch(apiHost + '/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url, redirectUrl: url })
-      });
-      const json = await res.json();
-      if (json.success) {
-        showToast('Đã kết nối thành công: ' + (json.riotId || (json.user ? `${json.user.gameName}#${json.user.tagLine}` : 'Riot Account')));
-        closeLoginModal();
-        input.value = '';
-        await loadData();
       } else {
-        showToast('Lỗi: ' + (json.message || 'Không thể đăng nhập!'));
+        throw new Error('Chưa tải được Client Riot Engine');
       }
     } catch (e) {
-      showToast('Lỗi: ' + e.message);
+      showToast('Lỗi: ' + (e.message || 'Không thể đăng nhập!'));
     } finally {
       btn.textContent = 'Xác Nhận Kết Nối Tài Khoản';
       btn.disabled = false;
@@ -1607,26 +1575,24 @@
       return;
     }
 
-    if (window.ClientRiotEngine && ClientRiotEngine.skinCache.size > 0) {
-      const localResults = ClientRiotEngine.searchSkins(q, '', '', 15);
-      renderSkinSuggestions(localResults);
-      return;
-    }
-
     spin.classList.remove('hidden');
+    clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(async () => {
-      const apiHost = getApiHost();
       try {
-        const res = await fetch(apiHost + '/api/skins/search?q=' + encodeURIComponent(q));
-        const json = await res.json();
-        spin.classList.add('hidden');
-        if (json.success && json.data) {
-          renderSkinSuggestions(json.data);
+        if (window.ClientRiotEngine) {
+          if (ClientRiotEngine.skinCache.size === 0) {
+            await ClientRiotEngine.preloadMetadata();
+          }
+          const localResults = ClientRiotEngine.searchSkins(q, '', '', 20);
+          spin.classList.add('hidden');
+          renderSkinSuggestions(localResults);
+        } else {
+          spin.classList.add('hidden');
         }
       } catch (e) {
         spin.classList.add('hidden');
       }
-    }, 250);
+    }, 200);
   }
 
   function renderSkinSuggestions(skins) {
@@ -1740,18 +1706,15 @@
   }
 
   async function quickSearchSkin(name) {
-    const apiHost = getApiHost();
-    try {
-      const res = await fetch(apiHost + '/api/skins/search?q=' + encodeURIComponent(name));
-      const json = await res.json();
-      if (json.success && json.data && json.data.length > 0) {
-        openSkinViewer(json.data[0]);
-      } else {
-        openSkinViewer({ name, price: 1775, tier: 'Premium', icon: 'https://media.valorant-api.com/weaponskinlevels/4e435234-49a2-1444-4640-908692c855b8/displayicon.png' });
+    if (window.ClientRiotEngine) {
+      if (ClientRiotEngine.skinCache.size === 0) await ClientRiotEngine.preloadMetadata();
+      const results = ClientRiotEngine.searchSkins(name, '', '', 1);
+      if (results && results.length > 0) {
+        openSkinViewer(results[0]);
+        return;
       }
-    } catch (e) {
-      openSkinViewer({ name, price: 1775, tier: 'Premium', icon: 'https://media.valorant-api.com/weaponskinlevels/4e435234-49a2-1444-4640-908692c855b8/displayicon.png' });
     }
+    openSkinViewer({ name, price: 1775, tier: 'Premium', icon: 'https://media.valorant-api.com/weaponskinlevels/4e435234-49a2-1444-4640-908692c855b8/displayicon.png' });
   }
 
   // ==========================================
@@ -1809,8 +1772,11 @@
     badge.textContent = 'Đang tra cứu...';
 
     // 1. Standalone Direct Search (Instant 0-latency)
-    if (window.ClientRiotEngine && ClientRiotEngine.skinCache.size > 0) {
-      const skins = ClientRiotEngine.searchSkins(query, weapon, tier, 60);
+    if (window.ClientRiotEngine) {
+      if (ClientRiotEngine.skinCache.size === 0) {
+        await ClientRiotEngine.preloadMetadata();
+      }
+      const skins = ClientRiotEngine.searchSkins(query, weapon, tier, 80);
       window.__catalogSkins = skins;
       badge.textContent = skins.length + ' skins';
       grid.innerHTML = '';
@@ -1848,66 +1814,32 @@
       });
       return;
     }
-
-    const apiHost = getApiHost();
-    try {
-      const url = apiHost + '/api/skins?weapon=' + encodeURIComponent(weapon || '') + '&tier=' + encodeURIComponent(tier || '') + '&q=' + encodeURIComponent(query || '') + '&limit=60';
-      const res = await fetch(url);
-      const json = await res.json();
-      if (json.success && json.data) {
-        window.__catalogSkins = json.data;
-        badge.textContent = json.count + ' skins';
-        grid.innerHTML = '';
-        if (json.data.length === 0) {
-          grid.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-8">' + (currentLang === 'vi' ? 'Không tìm thấy skin nào phù hợp bộ lọc.' : 'No skins matching this filter.') + '</div>';
-          return;
-        }
-
-        json.data.forEach((s, idx) => {
-          const hasVideo = !!(s.video || s.streamedVideo);
-          grid.innerHTML += `
-            <div class="glass-card p-3 rounded-2xl flex flex-col justify-between hover:border-[#ff4655]/60 transition-all group">
-              <div class="flex items-center justify-between text-[10px]">
-                <span class="px-1.5 py-0.2 rounded-md bg-white/5 border border-white/10 text-amber-300 font-bold">${s.tier || 'Select'}</span>
-                <div class="flex items-center gap-1 font-mono font-bold text-gray-200">
-                  <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/displayicon.png" class="w-3 h-3 object-contain inline-block">
-                  <span>${(s.price || 1775).toLocaleString()} VP</span>
-                </div>
-              </div>
-              <div class="my-3 flex items-center justify-center h-20">
-                <img src="${s.icon}" onerror="this.src='https://media.valorant-api.com/weaponskins/3f6410af-4fd7-74fb-c0f4-6ab61d30022c/displayicon.png'" class="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-105 transition-transform" alt="${s.name}">
-              </div>
-              <div>
-                <div class="text-xs font-bold text-white truncate mb-2">${s.name}</div>
-                <button onclick="openSkinViewerByIndex('catalog', ${idx})" class="w-full py-1.5 ${hasVideo ? 'bg-[#ff4655] hover:bg-red-600 text-white' : 'bg-white/10 hover:bg-white/20 text-gray-200'} rounded-xl text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow">
-                  <span>${hasVideo ? '▶' : '🔍'}</span> <span>${hasVideo ? 'Xem Video' : 'Xem Ảnh'}</span>
-                </button>
-              </div>
-            </div>
-          `;
-        });
-      }
-    } catch (e) {
-      badge.textContent = 'Lỗi tải';
-      console.warn('Catalog load error:', e.message);
-    }
   }
 
   // ==========================================
   // TAB 3: LIVE PREGAME LOBBY & AGENT SELECTION LOGIC
   // ==========================================
   async function loadAllAgents() {
-    if (window.ClientRiotEngine && ClientRiotEngine.agentsList && ClientRiotEngine.agentsList.length > 0) {
-      allAgentsList = ClientRiotEngine.agentsList;
-      renderAgentsRoster(allAgentsList);
-      return;
+    if (window.ClientRiotEngine) {
+      if (!ClientRiotEngine.agentsList || ClientRiotEngine.agentsList.length === 0) {
+        await ClientRiotEngine.preloadMetadata();
+      }
+      if (ClientRiotEngine.agentsList && ClientRiotEngine.agentsList.length > 0) {
+        allAgentsList = ClientRiotEngine.agentsList;
+        renderAgentsRoster(allAgentsList);
+        return;
+      }
     }
-    const apiHost = getApiHost();
     try {
-      const res = await fetch(apiHost + '/api/agents');
+      const res = await fetch('https://valorant-api.com/v1/agents?isPlayableCharacter=true');
       const json = await res.json();
-      if (json.success && json.data) {
-        allAgentsList = json.data;
+      if (json && json.data) {
+        allAgentsList = json.data.map(a => ({
+          uuid: a.uuid,
+          displayName: a.displayName,
+          displayIcon: a.displayIcon,
+          role: a.role ? a.role.displayName : 'Agent'
+        }));
         renderAgentsRoster(allAgentsList);
       }
     } catch (e) {
@@ -1974,6 +1906,18 @@
   async function sendPickAction(action) {
     if (!currentActiveAgent) return;
     try {
+      if (isClientDemoActive) {
+        if (action === 'lock') {
+          document.getElementById('active-agent-state').textContent = 'ĐÃ KHÓA';
+          document.getElementById('active-agent-state').className = 'text-xs font-black text-emerald-400';
+          showToast('⚡ [Mô Phỏng] ĐÃ KHÓA THÀNH CÔNG: ' + currentActiveAgent.displayName);
+        } else {
+          document.getElementById('active-agent-state').textContent = 'ĐÃ HOVER';
+          showToast('[Mô Phỏng] Đã hover: ' + currentActiveAgent.displayName);
+        }
+        return;
+      }
+
       if (window.ClientRiotEngine && ClientRiotEngine.hasSession() && pregameMatchId) {
         if (action === 'lock') {
           await ClientRiotEngine.lockAgent(pregameMatchId, currentActiveAgent.uuid);
@@ -1988,27 +1932,7 @@
         await fetchPregameStatus();
         return;
       }
-
-      const apiHost = getApiHost();
-      const res = await fetch(apiHost + '/api/pregame/' + action, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ matchId: pregameMatchId, agentId: currentActiveAgent.uuid })
-      });
-      const json = await res.json();
-      if (json.success) {
-        if (action === 'lock') {
-          document.getElementById('active-agent-state').textContent = 'ĐÃ KHÓA';
-          document.getElementById('active-agent-state').className = 'text-xs font-black text-emerald-400';
-          showToast('⚡ ĐÃ KHÓA THÀNH CÔNG: ' + currentActiveAgent.displayName);
-        } else {
-          document.getElementById('active-agent-state').textContent = 'ĐÃ HOVER';
-          showToast('Đã hover: ' + currentActiveAgent.displayName);
-        }
-        await fetchPregameStatus();
-      } else {
-        showToast('Lỗi: ' + (json.message || 'Không thể thực hiện'));
-      }
+      showToast('Vui lòng kết nối tài khoản Riot để chọn tướng trong trận!');
     } catch (e) {
       showToast('Lỗi: ' + e.message);
     }
@@ -2106,15 +2030,7 @@
         data = await ClientRiotEngine.getPregameMatch();
       } catch (e) {}
     }
-    if (!data || !data.inPregame) {
-      const apiHost = getApiHost();
-      try {
-        const res = await fetch(apiHost + '/api/pregame/status');
-        const json = await res.json();
-        if (json.success && json.data) data = json.data;
-      } catch (e) {}
-    }
-    if (data) {
+    if (data && data.inPregame) {
       renderPregameLobby(data);
     } else {
       renderPregameLobby({ inPregame: false });
@@ -2429,19 +2345,9 @@
       }
     }
 
-    // 3. Fallback to Local/Remote Server (Web PC dev)
-    const apiHost = getApiHost();
-    try {
-      const res = await fetch(apiHost + '/api/player/current');
-      const data = await res.json();
-      if (data.success && data.data) {
-        renderPlayerData(data.data);
-      } else if (!localCached) {
-        renderLoggedOutState();
-      }
-    } catch (e) {
-      console.warn('API load error:', e.message);
-      if (!localCached) renderLoggedOutState();
+    // 3. Not logged in
+    if (!localCached) {
+      renderLoggedOutState();
     }
   }
 
@@ -2536,14 +2442,6 @@
         data = await ClientRiotEngine.getPregameMatch();
       } catch (e) {}
     }
-    if (!data || !data.inPregame) {
-      const apiHost = getApiHost();
-      try {
-        const res = await fetch(apiHost + '/api/pregame/status');
-        const json = await res.json();
-        if (json.success && json.data) data = json.data;
-      } catch (e) {}
-    }
 
     if (data && data.inPregame && data.matchId) {
       pregameMatchId = data.matchId;
@@ -2613,12 +2511,15 @@
   setInterval(checkLivePregameMatch, 3500);
 
   // Init
-  const hostInput = document.getElementById('settings-server-host');
-  if (hostInput) hostInput.value = localStorage.getItem('skinpeek_server_host') || getApiHost();
-
+  // App Startup Init (100% Client-Side Direct)
   loadData();
-  loadAllAgents();
-  fetchPregameStatus();
+  if (window.ClientRiotEngine) {
+    ClientRiotEngine.preloadMetadata().then(() => {
+      loadAllAgents();
+    });
+  } else {
+    loadAllAgents();
+  }
   renderAlertList();
   </script>
 </body>
