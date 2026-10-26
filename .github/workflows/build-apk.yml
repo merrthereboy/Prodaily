@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     name: Build Release & Debug APK
@@ -39,9 +42,36 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
+      - name: 📦 Rename APK for Release
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Prodaily-v1.0.0.apk
+
       - name: 🚀 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Prodaily-Valorant-Mobile.apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Prodaily-v1.0.0.apk
+          path: Prodaily-v1.0.0.apk
           retention-days: 30
+
+      - name: 📢 Auto Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: Prodaily v1.0.0 - Valorant Mobile Assistant
+          body: |
+            📱 **Prodaily v1.0.0 - Bản phát hành chính thức dành cho Android**
+
+            ✨ **Tính năng nổi bật:**
+            - 🛒 **Xem Shop & Chợ Đêm:** Xem 4 skin hàng ngày và chợ đêm với video hoạt ảnh cấp độ, biến thể màu sắc.
+            - 🎒 **Kho Đồ & Thư Viện Skin:** Tra cứu toàn bộ skin súng, dao, thẻ bài và kho đồ cá nhân.
+            - ⚡ **Pick & Khóa Tướng Từ Xa (Remote Instalock):** Hỗ trợ Unrated và Competitive, tự nhận diện map và đội hình.
+            - 💎 **Định Giá Tài Khoản Chuẩn Mezu:** Tính tổng số tiền đã nạp theo tỷ giá ZaloPay chính hãng.
+            - 🛡️ **Tiện Ích:** Chế độ ẩn số dư ví, đổi ngôn ngữ Việt - Anh, hẹn skin yêu thích.
+
+            👤 Tác giả: **merrthereboy**  
+            💬 Cộng đồng Discord: https://discord.com/invite/z4jUC4v8W2
+          files: Prodaily-v1.0.0.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
